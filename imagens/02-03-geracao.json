@@ -1,0 +1,14 @@
+{
+  "data": "2026-11-06",
+  "rota": "chat",
+  "navegador": "Claude in Chrome, conta dele",
+  "modelo": "4 Argon",
+  "esforco": "Alto",
+  "formato": "16:9",
+  "conversa": "https://gemini.google.com/u/0/app/eff05c29693e4858",
+  "imagens": [
+    {"arquivo": "02-primeira-dobra-sem-cara-de-ia.jpg", "bytes": 154880, "tamanho": "1376x768", "prompt": "prompt-02-primeira-dobra-sem-cara-de-ia.txt"},
+    {"arquivo": "03-cena-agente-sem-interface.jpg", "bytes": 84087, "tamanho": "1376x768", "prompt": "Agora gere só a fotografia de fundo desta mesma cena, horizontal 16:9, sem nenhum texto, cartão, botão, formulário, logo ou interface. Mesmo agente de terno preto e óculos escuros com a maleta algemada, mesmo disco voador e feixe verde, mesmo fundo quase preto com tom verde-petróleo e grão de filme. O agente fica de pé, inteiro da cabeça até abaixo da cintura, centrado em 65% da largura da imagem; a metade esquerda é céu escuro e limpo, sem objetos, para receber texto por cima."}
+  ],
+  "observacoes": "A 03 virou assets/cena-agente.jpg (agente medido em 63,6% da largura). Personagem gerado por IA, nunca apresentado como a equipe (G5). Na 02 o cartão saiu ao lado do agente, não por cima; o HTML corrige."
+}

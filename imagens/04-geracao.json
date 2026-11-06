@@ -1,0 +1,15 @@
+{
+  "arquivo": "04-cena-agente-fundo-do-modelo.jpg",
+  "data": "2026-11-06",
+  "rota": "chat",
+  "navegador": "Claude in Chrome, conta dele",
+  "modelo": "4 Argon",
+  "esforco": "Alto",
+  "formato": "16:9",
+  "tamanho_original": "1376x768",
+  "bytes": 166699,
+  "conversa": "https://gemini.google.com/u/0/app/d86e29caaf9a0d1e",
+  "referencias_anexadas": ["parte de baixo de referencias/modelo-reprovado.jpg (1422x700 a partir de y 900, contagem e botão desfocados)", "assets/cena-agente.jpg"],
+  "prompt": "Gere uma fotografia de fundo horizontal 16:9 juntando as duas imagens anexadas. Da primeira imagem, copie o fundo: céu noturno estrelado com nuvens e nebulosa de verde neon intenso e saturado, verde alienígena vivo (não verde-petróleo nem azulado), e a silhueta da mesma cidade embaixo, com prédios à esquerda e a igreja de duas torres à direita, iluminada de verde. Ignore a contagem regressiva, os números e o botão da primeira imagem: não desenhe nenhum texto, número, botão ou interface. Da segunda imagem, mantenha o mesmo agente de terno preto, camisa branca, gravata preta e óculos escuros, com a maleta metálica algemada ao pulso, e o disco voador no alto lançando o feixe de luz sobre ele, agora com o feixe e o brilho no mesmo verde neon da primeira imagem. O agente fica de pé na frente da cidade, da cabeça até abaixo da cintura, centrado em 64% da largura; a cidade aparece atrás dele no terço de baixo. A metade esquerda fica com o céu e as nuvens verdes, sem objetos grandes, para receber texto por cima. Sem logo, sem letras, sem marca d'água. Acabamento de foto de campanha, com grão leve.",
+  "observacoes": "Virou assets/cena-agente-fundo-verde.jpg; agente medido em 63,4%. Anexos entraram por postMessage de uma página local temporária (apagada) para um evento de colar no editor do Gemini."
+}

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Black de Outro Mundo | Fontes Energia</title>
+  <meta name="description" content="Os agentes da Fontes Energia investigam sua conta de luz de graça e mostram quanto você economiza com energia solar.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=13">
+</head>
+<!-- Número de WhatsApp da Fontes: só dígitos, com 55 e DDD (ex.: 5591999999999).
+     Datas da campanha no horário de Brasília (-03:00): a página entra no ar dia 10/11 em
+     expectativa, a Black vai de 27/11 a 29/11 e depois fica encerrada, com cadastro aberto.
+     Para ver outro momento: index.html?agora=2026-11-27T09:00 -->
+<body data-whatsapp=""
+      data-lancamento="2026-11-27T00:00:00-03:00"
+      data-encerramento="2026-11-29T23:59:59-03:00">
+  <header class="topo">
+    <a href="#topo" class="topo-logo" aria-label="Black de Outro Mundo, início">
+      <img src="assets/logo-black-de-outro-mundo.png?v=1" alt="Black de Outro Mundo" width="629" height="534">
+    </a>
+    <a class="topo-agente" href="#" data-wa="agente">Falar com um agente</a>
+  </header>
+
+  <main id="topo">
+    <!-- 1. Porta: dor e início da investigação -->
+    <section class="dobra" aria-labelledby="titulo">
+      <div class="dobra-cena" aria-hidden="true"></div>
+
+      <div class="dobra-texto">
+        <h1 id="titulo">Tem algo estranho na sua conta de luz.</h1>
+        <p class="dobra-sub">Nossos agentes investigam sua conta de graça e mostram quanto você economiza com energia solar.</p>
+        <p class="dobra-assinatura">Preços que não são desse planeta.</p>
+      </div>
+
+      <form class="investigacao" id="investigacao" novalidate>
+        <!-- Etapa 1: faixa da conta -->
+        <div class="etapa" data-etapa="1">
+          <h2 tabindex="-1">Investigação da conta</h2>
+          <fieldset>
+            <legend>Quanto veio sua última conta de luz?</legend>
+            <div class="opcoes opcoes-2">
+              <label class="opcao"><input type="radio" name="faixa" value="ate-300"><span>Até R$ 300</span></label>
+              <label class="opcao"><input type="radio" name="faixa" value="300-600"><span>R$ 300 a 600</span></label>
+              <label class="opcao"><input type="radio" name="faixa" value="600-1000"><span>R$ 600 a 1.000</span></label>
+              <label class="opcao"><input type="radio" name="faixa" value="1000-mais"><span>Mais de R$ 1.000</span></label>
+            </div>
+          </fieldset>
+          <p class="investigacao-aviso" role="alert" hidden>Escolha a faixa da sua conta para começar.</p>
+          <button type="button" class="botao" data-avancar="2" data-texto-fase="botao">Investigar minha conta</button>
+          <p class="investigacao-nota">Resposta imediata, todos os dias</p>
+        </div>
+
+        <!-- Etapa 2: tipo de imóvel -->
+        <div class="etapa" data-etapa="2" hidden>
+          <h2 tabindex="-1">Onde fica essa conta?</h2>
+          <fieldset>
+            <legend class="sr">Tipo de imóvel</legend>
+            <div class="opcoes opcoes-1">
+              <label class="opcao"><input type="radio" name="imovel" value="casa"><span>Casa ou apartamento</span></label>
+              <label class="opcao"><input type="radio" name="imovel" value="empresa"><span>Comércio ou empresa</span></label>
+              <label class="opcao"><input type="radio" name="imovel" value="rural"><span>Área rural</span></label>
+            </div>
+          </fieldset>
+          <p class="investigacao-aviso" role="alert" hidden>Escolha onde fica a conta.</p>
+          <button type="button" class="botao" data-avancar="3">Continuar a investigação</button>
+          <button type="button" class="voltar" data-voltar="1">Voltar</button>
+        </div>
+
+        <!-- Etapa 3: varredura e resultado -->
+        <div class="etapa" data-etapa="3" hidden>
+          <div class="varredura" aria-live="polite">
+            <div class="varredura-feixe" aria-hidden="true"></div>
+            <p class="varredura-texto">Investigando a conta…</p>
+          </div>
+          <div class="resultado" hidden>
+            <h2 tabindex="-1" class="resultado-valor"></h2>
+            <p class="resultado-sub">Um agente vai mostrar quanto disso dá para cortar com energia solar no seu caso.</p>
+            <label class="campo">
+              <span>Seu nome</span>
+              <input type="text" name="nome" autocomplete="given-name" maxlength="60" required>
+            </label>
+            <p class="investigacao-aviso" role="alert" hidden>Escreva seu nome para o agente saber com quem fala.</p>
+            <button type="submit" class="botao" data-texto-fase="enviar">Receber no WhatsApp</button>
+            <p class="investigacao-nota">Abre uma conversa com a Fontes Energia. Resposta imediata, todos os dias.</p>
+          </div>
+        </div>
+
+        <!-- Etapa 4: obrigado e missão extra -->
+        <div class="etapa" data-etapa="4" hidden>
+          <h2 tabindex="-1" class="obrigado-titulo">Investigação aberta.</h2>
+          <p class="resultado-sub">Mande a mensagem que abriu no WhatsApp e um agente assume o caso.</p>
+          <a class="botao botao-link" href="#" data-wa="lead">Abrir o WhatsApp de novo</a>
+          <div class="missao-extra">
+            <h3>Missão extra</h3>
+            <p>Indique quem também paga caro de luz. Dois indicados com contrato fechado valem um ar-condicionado split. Três valem uma viagem para dois.</p>
+            <a class="link-verde" href="#" data-wa="indicar">Indicar pelo WhatsApp</a>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- Contagem da campanha: o texto muda com a fase (antes, durante, depois) -->
+    <section class="contagem" aria-labelledby="t-contagem">
+      <div class="largura">
+        <h2 id="t-contagem" class="contagem-titulo">As condições especiais da <em>Black de Outro Mundo</em> vão encerrar em</h2>
+        <div class="contagem-relogio" role="timer">
+          <div><span class="contagem-num" data-unidade="dias">00</span><span class="contagem-rotulo">Dias</span></div>
+          <div><span class="contagem-num" data-unidade="horas">00</span><span class="contagem-rotulo">Horas</span></div>
+          <div><span class="contagem-num" data-unidade="minutos">00</span><span class="contagem-rotulo">Minutos</span></div>
+        </div>
+        <p class="contagem-sub" data-texto-fase="contagemSub"></p>
+        <a class="botao botao-link botao-largo" href="#investigacao" data-ir-investigacao data-texto-fase="botao">Investigar minha conta</a>
+      </div>
+    </section>
+
+    <!-- 2. Mecanismo: por que o jeito antigo não resolve -->
+    <section class="secao mecanismo" aria-labelledby="t-mecanismo">
+      <div class="largura">
+        <h2 id="t-mecanismo" class="secao-titulo">Esqueça o que te disseram sobre economizar luz.</h2>
+        <div class="mecanismo-lados">
+          <div class="mecanismo-lado">
+            <h3>O jeito de sempre</h3>
+            <p>Apagar a luz, trocar lâmpada, desligar o ar mais cedo. Ajuda um pouco, só que a conta continua subindo, porque o preço da energia é reajustado todo ano e isso não depende de você.</p>
+          </div>
+          <div class="mecanismo-lado mecanismo-novo">
+            <h3>A peça que faltava</h3>
+            <p>Produzir a sua própria energia no telhado. O sistema é dimensionado pelo consumo real da sua conta, e o que você gera vira crédito com a distribuidora.</p>
+          </div>
+        </div>
+        <a class="link-verde" href="#investigacao" data-ir-investigacao data-texto-fase="botao">Investigar minha conta</a>
+      </div>
+    </section>
+
+    <!-- 3. Como a missão funciona -->
+    <section class="secao passos" aria-labelledby="t-passos">
+      <div class="largura">
+        <h2 id="t-passos" class="secao-titulo">Como a missão funciona</h2>
+        <ol class="passos-lista">
+          <li>
+            <span class="passo-num" aria-hidden="true">1</span>
+            <h3>Você escolhe a faixa da conta</h3>
+            <p>Leva menos de um minuto, aqui mesmo nesta página.</p>
+          </li>
+          <li>
+            <span class="passo-num" aria-hidden="true">2</span>
+            <h3>Um agente investiga</h3>
+            <p>No WhatsApp, ele pede a conta, entende o seu consumo e mostra quanto você deixa de pagar.</p>
+          </li>
+          <li>
+            <span class="passo-num" aria-hidden="true">3</span>
+            <h3>A equipe instala</h3>
+            <p>Projeto, instalação e liberação com a distribuidora ficam com a Fontes Energia.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 4. A maleta aberta: o que a pessoa leva -->
+    <section class="secao maleta" aria-labelledby="t-maleta">
+      <div class="largura maleta-grade">
+        <div>
+          <h2 id="t-maleta" class="secao-titulo">O que vem na maleta</h2>
+          <p class="secao-sub">Tudo o que você leva quando fecha com a Fontes Energia.</p>
+        </div>
+        <dl class="maleta-itens">
+          <div><dt>Projeto sob medida</dt><dd>Calculado pelo seu consumo e pelo seu telhado.</dd></div>
+          <div><dt>Equipamentos</dt><dd>Painéis e inversor no tamanho certo do projeto.</dd></div>
+          <div><dt>Instalação</dt><dd>Feita pela equipe da Fontes Energia.</dd></div>
+          <div><dt>Homologação</dt><dd>O pedido de conexão com a distribuidora.</dd></div>
+          <div><dt>Monitoramento</dt><dd>A geração acompanhada pelo celular.</dd></div>
+          <div class="maleta-black"><dt>Condição da Black</dt><dd data-texto-fase="maleta">As condições de novembro são passadas pelo agente no WhatsApp.</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- 5. Perguntas interceptadas -->
+    <section class="secao perguntas" aria-labelledby="t-perguntas">
+      <div class="largura perguntas-grade">
+        <h2 id="t-perguntas" class="secao-titulo">Perguntas interceptadas</h2>
+        <div class="perguntas-lista">
+          <details>
+            <summary>A investigação é paga?</summary>
+            <p>Não. A investigação da conta é gratuita e sem compromisso.</p>
+          </details>
+          <details>
+            <summary>Quanto custa a energia solar?</summary>
+            <p>Depende do seu consumo e do seu telhado, por isso o valor sai depois da investigação. O agente passa o preço e as condições da Black pelo WhatsApp.</p>
+          </details>
+          <details>
+            <summary>Funciona em dia nublado?</summary>
+            <p>Funciona. Em dia nublado a geração cai, mas o sistema é calculado pela média do ano inteiro, e não por um dia só.</p>
+          </details>
+          <details>
+            <summary>E à noite?</summary>
+            <p>À noite você usa a energia da rede. O que sobrou durante o dia vira crédito com a distribuidora e abate esse consumo.</p>
+          </details>
+          <details>
+            <summary>Por que agentes?</summary>
+            <p>Porque a missão é investigar conta alta. Fora da campanha, somos a equipe da Fontes Energia.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Fechamento -->
+    <section class="fechamento" aria-labelledby="t-fechamento">
+      <div class="largura">
+        <h2 id="t-fechamento">Preços que não são desse planeta.</h2>
+        <p data-texto-fase="fechamento">As condições da Black de Outro Mundo valem por tempo limitado.</p>
+        <a class="botao botao-link botao-largo" href="#investigacao" data-ir-investigacao data-texto-fase="botao">Investigar minha conta</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <p>Fontes Energia · Black de Outro Mundo</p>
+  </footer>
+
+  <a class="flutuante" href="#" data-wa="agente" hidden>
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.6 7.3L3 20l1.3-5A8.4 8.4 0 1 1 21 11.5z"/></svg>
+    <span>Falar com um agente</span>
+  </a>
+
+  <script src="app.js?v=5"></script>
+</body>
+</html>

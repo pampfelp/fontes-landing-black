@@ -1,0 +1,701 @@
+/* Black de Outro Mundo, landing da Fontes. Paleta da campanha: quase preto
+   com tom verde e o verde do logo, reservado para ação e escolha. */
+:root {
+  --bg: #0b110d;
+  --panel: #141c17;
+  --ink: #edf3ee;
+  --ink-2: #c9d4cc;
+  --muted: #9fb0a4;
+  --line: #2a3630;
+  --accent: #45e23f;
+  --accent-ink: #07120b;
+  --cena-x: 63.4%;
+  --fonte: "Archivo", system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { margin: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--fonte);
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { max-width: 100%; display: block; }
+
+/* Topo: só o logo e um caminho direto para o WhatsApp */
+.topo {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px clamp(20px, 5vw, 72px);
+}
+
+.topo-logo img { width: clamp(112px, 11vw, 168px); height: auto; }
+
+.topo-agente {
+  margin-top: 14px;
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 6px;
+  text-decoration-thickness: 2px;
+}
+
+.topo-agente:hover { color: var(--accent); }
+
+/* Primeira dobra */
+.dobra {
+  position: relative;
+  min-height: max(100svh, 680px);
+  max-height: 1000px;
+  display: flex;
+  align-items: center;
+  padding: 140px clamp(20px, 5vw, 72px) 64px;
+}
+
+.dobra-cena {
+  position: absolute;
+  inset: 0;
+  background: var(--bg) url("assets/cena-agente-fundo-verde.jpg?v=1") no-repeat;
+  background-size: cover;
+  background-position: var(--cena-x) 85%;
+}
+
+/* Escurece só a faixa do texto, para a cena continuar visível */
+.dobra-cena::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(11, 17, 13, .78) 0%, rgba(11, 17, 13, .35) 38%, rgba(11, 17, 13, 0) 55%);
+}
+
+.dobra-texto {
+  position: relative;
+  max-width: min(38rem, 46vw);
+}
+
+.dobra-texto h1 {
+  margin: 0 0 24px;
+  font-size: clamp(2.5rem, 4.4vw, 4.3rem);
+  font-weight: 800;
+  font-stretch: 118%;
+  line-height: 1.02;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+.dobra-sub {
+  margin: 0;
+  max-width: 28rem;
+  color: var(--ink-2);
+  font-size: clamp(1.06rem, 1.3vw, 1.25rem);
+}
+
+.dobra-assinatura {
+  margin: 40px 0 0;
+  color: var(--muted);
+  font-weight: 600;
+  font-stretch: 110%;
+}
+
+/* Cartão da investigação: em cima do agente, centrado no torso dele */
+.investigacao {
+  position: absolute;
+  left: var(--cena-x);
+  top: 47%;
+  transform: translateX(-50%);
+  width: min(400px, 92vw);
+  padding: 28px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.investigacao h2 {
+  margin: 0 0 6px;
+  font-size: 1.35rem;
+  font-weight: 800;
+  font-stretch: 110%;
+  line-height: 1.2;
+}
+
+.investigacao fieldset { margin: 0; padding: 0; border: 0; }
+
+.investigacao legend {
+  padding: 0;
+  margin-bottom: 18px;
+  color: var(--ink-2);
+}
+
+.opcoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.opcoes-1 { grid-template-columns: 1fr; }
+
+.opcao { position: relative; cursor: pointer; }
+
+.opcao input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.opcao span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--ink-2);
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.opcao:hover span { border-color: var(--muted); color: var(--ink); }
+
+.opcao input:checked + span {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.opcao input:focus-visible + span,
+.botao:focus-visible,
+.topo-agente:focus-visible,
+.topo-logo:focus-visible,
+.voltar:focus-visible,
+.link-verde:focus-visible,
+.flutuante:focus-visible,
+.perguntas summary:focus-visible,
+.campo input:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.investigacao-aviso {
+  margin: 12px 0 0;
+  color: var(--ink);
+  font-size: .94rem;
+}
+
+.botao {
+  width: 100%;
+  min-height: 54px;
+  margin-top: 20px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font: inherit;
+  font-size: 1.06rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.botao:hover { background: #5cf055; }
+
+.investigacao-nota {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: .9rem;
+  text-align: center;
+}
+.investigacao h2:focus { outline: none; }
+
+.sr {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Etapas da investigação */
+.voltar {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: .95rem;
+  cursor: pointer;
+}
+
+.voltar:hover { color: var(--ink); text-decoration: underline; }
+
+.varredura {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 250px;
+  overflow: hidden;
+}
+
+.varredura[hidden] { display: none; }
+
+.varredura-feixe {
+  position: absolute;
+  left: -28px;
+  right: -28px;
+  top: -45%;
+  height: 45%;
+  background: linear-gradient(180deg, rgba(69, 226, 63, 0), rgba(69, 226, 63, .28), rgba(69, 226, 63, 0));
+  animation: varrer 1.6s ease-in-out forwards;
+}
+
+@keyframes varrer { to { top: 100%; } }
+
+.varredura-texto { margin: 0; color: var(--ink-2); font-weight: 600; }
+
+.investigacao .resultado-valor {
+  font-size: 1.5rem;
+  line-height: 1.18;
+}
+
+.resultado-sub { margin: 8px 0 0; color: var(--ink-2); }
+
+.etapa[data-etapa="2"] .opcoes { margin-top: 18px; }
+
+.campo { display: block; }
+
+.campo span {
+  display: block;
+  margin: 20px 0 8px;
+  color: var(--ink-2);
+  font-weight: 600;
+}
+
+.campo input {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+}
+
+.campo input:focus { border-color: var(--accent); }
+
+.botao-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.missao-extra {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.missao-extra h3 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  font-stretch: 110%;
+}
+
+.missao-extra p { margin: 0; color: var(--ink-2); font-size: .95rem; }
+
+.link-verde {
+  display: inline-block;
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 2px;
+}
+
+.missao-extra .link-verde { margin-top: 12px; }
+
+/* Seções de baixo */
+.largura {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 72px);
+}
+
+.secao { padding: clamp(80px, 10vw, 128px) 0; }
+
+.secao-titulo {
+  margin: 0 0 40px;
+  max-width: 18ch;
+  font-size: clamp(1.9rem, 3.6vw, 3.1rem);
+  font-weight: 800;
+  font-stretch: 112%;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.secao-sub { margin: -24px 0 0; color: var(--ink-2); max-width: 26rem; }
+
+/* Mecanismo: dois lados, o novo marcado pela linha verde */
+.mecanismo-lados {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 40px;
+}
+
+.mecanismo-lado { padding-right: 48px; }
+
+.mecanismo-lado h3 {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.mecanismo-lado p { margin: 0; color: var(--ink-2); font-size: 1.1rem; max-width: 30rem; }
+
+.mecanismo-novo {
+  padding: 0 0 0 40px;
+  border-left: 2px solid var(--accent);
+}
+
+.mecanismo-novo h3 { color: var(--accent); }
+.mecanismo-novo p { color: var(--ink); }
+
+/* Passos: a sequência ligada por uma linha */
+.passos { padding-top: 0; }
+
+.passos-lista {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.passos-lista::before {
+  content: "";
+  position: absolute;
+  top: 21px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--line);
+}
+
+.passos-lista li { position: relative; }
+
+.passo-num {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.passos-lista h3 { margin: 22px 0 8px; font-size: 1.2rem; font-weight: 800; font-stretch: 108%; }
+.passos-lista p { margin: 0; color: var(--ink-2); max-width: 22rem; }
+
+/* Maleta: o que a pessoa leva, como itens tirados de dentro */
+.maleta { background: var(--panel); border-block: 1px solid var(--line); }
+
+.maleta-grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+  gap: 64px;
+  align-items: start;
+}
+
+.maleta-itens {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 40px;
+  margin: 0;
+}
+
+.maleta-itens > div { padding: 20px 0; border-top: 1px solid var(--line); }
+.maleta-itens dt { font-weight: 800; font-size: 1.08rem; }
+.maleta-itens dd { margin: 6px 0 0; color: var(--ink-2); }
+.maleta-itens .maleta-black { border-top-color: var(--accent); }
+.maleta-black dt { color: var(--accent); }
+
+/* Perguntas */
+.perguntas-grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+  gap: 64px;
+  align-items: start;
+}
+
+.perguntas details { border-top: 1px solid var(--line); }
+.perguntas details:last-child { border-bottom: 1px solid var(--line); }
+
+.perguntas summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 0;
+  font-size: 1.12rem;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.perguntas summary::-webkit-details-marker { display: none; }
+
+.perguntas summary::after {
+  content: "+";
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.perguntas details[open] summary::after { content: "\2212"; }
+.perguntas details p { margin: 0 0 22px; color: var(--ink-2); max-width: 38rem; }
+
+/* Fechamento: a cidade e as nuvens do lado esquerdo da cena */
+.fechamento {
+  padding: 128px 0 260px;
+  text-align: center;
+  background:
+    linear-gradient(180deg, var(--bg) 0%, rgba(11, 17, 13, .55) 45%, rgba(11, 17, 13, .2) 100%),
+    url("assets/cena-agente-fundo-verde.jpg?v=1") 0% 100% / 200% auto no-repeat,
+    var(--bg);
+}
+
+.fechamento h2 {
+  margin: 0 auto 16px;
+  max-width: 14ch;
+  font-size: clamp(2.4rem, 6vw, 5rem);
+  font-weight: 800;
+  font-stretch: 115%;
+  line-height: 1;
+  text-wrap: balance;
+}
+
+.fechamento p { margin: 0 0 32px; color: var(--ink-2); font-size: 1.1rem; }
+
+.botao-largo {
+  display: inline-flex;
+  width: auto;
+  padding: 0 40px;
+  margin-top: 0;
+}
+
+.rodape {
+  padding: 28px 20px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: .9rem;
+  text-align: center;
+}
+
+.rodape p { margin: 0; }
+
+/* WhatsApp sempre à mão depois que o cartão sai da tela */
+.flutuante {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.flutuante[hidden] { display: none; }
+.flutuante:hover { background: #5cf055; }
+
+/* Contagem da campanha: moldura verde com dias, horas e minutos */
+.contagem {
+  padding: clamp(80px, 10vw, 120px) 0;
+  text-align: center;
+  border-block: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, rgba(11, 17, 13, .9) 0%, rgba(11, 17, 13, .72) 50%, rgba(11, 17, 13, .9) 100%),
+    url("assets/cena-agente-fundo-verde.jpg?v=1") 6% 12% / 230% auto no-repeat,
+    var(--bg);
+}
+
+.contagem-titulo {
+  margin: 0 auto 36px;
+  max-width: 30ch;
+  font-size: clamp(1.45rem, 3vw, 2.3rem);
+  font-weight: 800;
+  font-stretch: 115%;
+  line-height: 1.12;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.contagem-titulo em { font-style: normal; color: var(--accent); }
+
+@media (min-width: 861px) {
+  .contagem-titulo em { white-space: nowrap; }
+}
+
+.contagem-relogio {
+  display: inline-grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(20px, 5vw, 64px);
+  padding: 26px clamp(28px, 5vw, 60px) 22px;
+  border: 2px solid var(--accent);
+  border-radius: 6px;
+  background: rgba(7, 18, 11, .78);
+}
+
+.contagem-num {
+  display: block;
+  color: var(--accent);
+  font-size: clamp(3.2rem, 9vw, 5.6rem);
+  font-weight: 900;
+  font-stretch: 112%;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.contagem-rotulo {
+  display: block;
+  margin-top: 10px;
+  color: var(--ink-2);
+  font-size: .85rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.contagem-sub {
+  margin: 28px auto 0;
+  max-width: 34rem;
+  color: var(--ink-2);
+  font-size: 1.1rem;
+  text-wrap: balance;
+}
+
+.contagem .botao-largo { margin-top: 24px; }
+
+/* Encerrada: os zeros ficam apagados, o cadastro continua aberto */
+.contagem[data-fase="depois"] .contagem-relogio { border-color: var(--line); }
+.contagem[data-fase="depois"] .contagem-num { color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  .varredura-feixe { display: none; animation: none; }
+}
+
+/* Celular e tablet: três faixas. Texto no alto, o agente logo abaixo e o
+   cartão subindo por cima do torso dele, com o rosto livre. */
+@media (max-width: 860px) {
+  .dobra {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+    max-height: none;
+    padding: 0 0 48px;
+    /* nuvens verdes do lado esquerdo da cena atrás do texto */
+    background:
+      linear-gradient(180deg, rgba(11, 17, 13, .45) 0%, rgba(11, 17, 13, .7) 70%),
+      url("assets/cena-agente-fundo-verde.jpg?v=1") 4% top / auto 720px no-repeat,
+      var(--bg);
+  }
+
+  .dobra-texto {
+    grid-row: 1;
+    grid-column: 1;
+    max-width: none;
+    padding: 116px 20px 0;
+  }
+
+  .dobra-texto h1 {
+    font-size: clamp(2.2rem, 10vw, 3rem);
+    font-stretch: 104%;
+    margin-bottom: 14px;
+  }
+
+  .dobra-sub { font-size: 1.04rem; }
+  .dobra-assinatura { display: none; }
+
+  .dobra-cena {
+    position: relative;
+    grid-row: 2;
+    grid-column: 1;
+    height: 460px;
+    margin-top: -24px;
+    background-size: auto 100%;
+    background-position: 76% top;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 24%);
+    mask-image: linear-gradient(180deg, transparent 0, #000 24%);
+  }
+
+  .dobra-cena::after {
+    background: linear-gradient(180deg, rgba(11, 17, 13, 0) 70%, var(--bg) 100%);
+  }
+
+  .investigacao {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    grid-row: 3;
+    grid-column: 1;
+    width: auto;
+    margin: -236px 16px 0;
+    padding: 22px 18px;
+  }
+
+  .secao-titulo { margin-bottom: 28px; }
+  .secao-sub { margin-top: -12px; }
+
+  .mecanismo-lados { grid-template-columns: 1fr; gap: 28px; }
+  .mecanismo-lado { padding-right: 0; }
+  .mecanismo-novo { padding: 4px 0 4px 20px; }
+
+  .passos-lista { grid-template-columns: 1fr; gap: 32px; padding-left: 64px; }
+  .passos-lista::before { top: 0; bottom: 0; left: 21px; right: auto; width: 2px; height: auto; }
+  .passo-num { position: absolute; left: -64px; top: 0; }
+  .passos-lista h3 { margin-top: 8px; }
+
+  .maleta-grade, .perguntas-grade { grid-template-columns: 1fr; gap: 24px; }
+  .maleta-itens { grid-template-columns: 1fr; }
+
+  .fechamento {
+    padding: 96px 0 220px;
+    background-size: auto, auto 560px, auto;
+    background-position: 0 0, 8% 100%, 0 0;
+  }
+
+  .flutuante { left: 16px; right: 16px; bottom: 16px; justify-content: center; }
+
+  .contagem-relogio { display: grid; width: 100%; gap: 8px; padding: 22px 12px 18px; }
+  .contagem-rotulo { font-size: .75rem; letter-spacing: .06em; }
+  .contagem .botao-largo { display: flex; width: 100%; }
+}

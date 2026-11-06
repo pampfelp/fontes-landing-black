@@ -1,0 +1,14 @@
+{
+  "arquivo": "01-primeira-dobra-desktop.jpg",
+  "data": "2026-11-06",
+  "rota": "chat",
+  "navegador": "Claude in Chrome, conta dele",
+  "modelo": "4 Argon",
+  "esforco": "Alto",
+  "formato": "16:9",
+  "tamanho_original": "1376x768",
+  "bytes": 177327,
+  "conversa": "https://gemini.google.com/u/0/app/83674ffed090bc67",
+  "prompt": "prompt-01-primeira-dobra-desktop.txt (texto digitado em uma linha; o logo foi descrito em vez de anexado)",
+  "observacoes": "Logo da campanha reinterpretado pelo modelo; na página entra o PNG original de referencias/. Agente gerado por IA: personagem, nunca apresentado como a equipe (antecipação G5)."
+}
