@@ -257,6 +257,7 @@ function iniciarApp() {
   escutar(qNegocios, (snap) => {
     estado.negocios = new Map(snap.docs.map((d) => [d.id, { id: d.id, ...d.data() }]));
     desenharFunil();
+    desenharEquipe();
     if (estado.aberto) atualizarModalAberto();
   });
 
