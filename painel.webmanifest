@@ -1,0 +1,13 @@
+{
+  "name": "Painel de leads Fontes Energia",
+  "short_name": "Leads Fontes",
+  "start_url": "painel.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b110d",
+  "theme_color": "#0b110d",
+  "icons": [
+    { "src": "assets/icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

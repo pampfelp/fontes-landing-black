@@ -11,6 +11,22 @@ HTML, CSS e JavaScript puros, sem build.
   - de 27/11 a 29/11 (até 23h59): Black, com contagem até o fim ("Descobrir minha oferta");
   - depois: encerrada, com o contador zerado e o cadastro ainda aberto ("Quero ser atendido").
 
+## Painel de leads (`painel.html`)
+
+Para a equipe da Fontes: login por e-mail e senha, funil em kanban
+(Novo Lead, Tentativa de Contato, Proposta Enviada, Negociação, Visita
+Técnica, Ganho, Perdido), cadastro de vendedores e rodízio.
+
+- O contato da landing entra em `leads` (só criação) e o painel de quem
+  estiver aberto entrega ao próximo vendedor ativo da fila, em ordem fixa.
+  As regras conferem que é mesmo a vez daquele vendedor.
+- Vendedor vê e move só os próprios leads. Administrador vê tudo, reatribui,
+  cadastra pessoas, pausa e muda a ordem da fila.
+- Primeiro acesso: só o e-mail do dono nasce administrador
+  ("Primeiro acesso do administrador" na tela de entrada).
+- Banco: Firebase `fontes-landing-black` (Firestore em São Paulo).
+  Regras em `firestore.rules`, publicadas pelo console.
+
 ## Configurar
 
 No `<body>` do `index.html`:
