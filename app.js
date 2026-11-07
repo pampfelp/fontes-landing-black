@@ -52,7 +52,9 @@ const FASES = {
 const LANCAMENTO = Date.parse(document.body.dataset.lancamento || '');
 const ENCERRAMENTO = Date.parse(document.body.dataset.encerramento || '');
 // ?agora=2026-11-15T10:00 simula outra data e hora de Brasília (para conferir os cenários)
-const SIMULADA = Date.parse(`${new URLSearchParams(location.search).get('agora')}:00-03:00`);
+// Só aceita data completa: sem o parâmetro, "null" virava 01/01/2000 em alguns navegadores
+const PEDIDA = new URLSearchParams(location.search).get('agora') || '';
+const SIMULADA = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(PEDIDA) ? Date.parse(`${PEDIDA}:00-03:00`) : NaN;
 const DESVIO = Number.isNaN(SIMULADA) ? 0 : SIMULADA - Date.now();
 const relogioAgora = () => Date.now() + DESVIO;
 
