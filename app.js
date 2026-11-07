@@ -299,7 +299,8 @@ form.addEventListener('submit', async (e) => {
     telefone,
     faixa: valor('faixa'),
     imovel: valor('imovel'),
-    fase
+    fase,
+    distribuido: false
   };
   if (dados.faixa === '1000-mais') dados.conta = contaRegua();
   if (location.search) dados.origem = location.search.slice(0, 300);
