@@ -513,18 +513,21 @@ img { max-width: 100%; display: block; }
 .maleta-itens .maleta-black { border-top-color: var(--accent); }
 .maleta-black dt { color: var(--accent); }
 
-/* Indicação: encarte de atacado (faixa amarela, etiqueta vermelha) */
+/* Indicação: formato de encarte (etiqueta, selo, letra condensada) nas cores da campanha */
 .indicacao {
   padding: clamp(72px, 9vw, 112px) 0;
-  background: #ffd60a;
-  color: #111;
+  border-block: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, rgba(11, 17, 13, .92) 0%, rgba(11, 17, 13, .78) 50%, rgba(11, 17, 13, .94) 100%),
+    url("assets/cena-agente-fundo-verde.jpg?v=1") 6% 12% / 230% auto no-repeat,
+    var(--bg);
 }
 .indicacao-selo {
   display: inline-block;
   margin: 0 0 14px;
   padding: 6px 14px;
-  background: #111;
-  color: #ffd60a;
+  background: var(--accent);
+  color: var(--accent-ink);
   font-weight: 900;
   font-stretch: 112%;
   text-transform: uppercase;
@@ -541,7 +544,8 @@ img { max-width: 100%; display: block; }
   text-transform: uppercase;
   text-wrap: balance;
 }
-.indicacao-sub { margin: 16px 0 0; max-width: 36rem; font-size: 1.15rem; font-weight: 600; }
+.indicacao-titulo em { font-style: normal; color: var(--accent); }
+.indicacao-sub { margin: 16px 0 0; max-width: 36rem; color: var(--ink-2); font-size: 1.15rem; font-weight: 600; }
 
 .ofertas {
   display: grid;
@@ -554,10 +558,10 @@ img { max-width: 100%; display: block; }
   display: flex;
   flex-direction: column;
   padding: 28px 24px 0;
-  border: 4px solid #111;
+  border: 3px solid var(--accent);
   border-radius: 6px;
-  background: #fff;
-  box-shadow: 8px 8px 0 #111;
+  background: var(--panel);
+  box-shadow: 8px 8px 0 rgba(69, 226, 63, .35);
 }
 .oferta-estrela {
   position: absolute;
@@ -567,8 +571,8 @@ img { max-width: 100%; display: block; }
   place-items: center;
   width: 96px;
   height: 96px;
-  background: #e30613;
-  color: #fff;
+  background: var(--accent);
+  color: var(--accent-ink);
   font-size: .95rem;
   font-weight: 900;
   font-stretch: 75%;
@@ -576,7 +580,7 @@ img { max-width: 100%; display: block; }
   clip-path: polygon(50% 0, 61% 18%, 82% 10%, 80% 32%, 100% 40%, 85% 56%, 96% 76%, 74% 78%, 68% 100%, 50% 86%, 32% 100%, 26% 78%, 4% 76%, 15% 56%, 0 40%, 20% 32%, 18% 10%, 39% 18%);
   transform: rotate(10deg);
 }
-.oferta-icone { width: 120px; height: auto; }
+.oferta-icone { width: 120px; height: auto; color: var(--ink); }
 .oferta-nome {
   margin: 14px 0 0;
   font-size: clamp(1.9rem, 3.4vw, 2.7rem);
@@ -585,7 +589,7 @@ img { max-width: 100%; display: block; }
   line-height: .95;
   text-transform: uppercase;
 }
-.oferta-detalhe { margin: 8px 0 20px; font-size: 1.05rem; font-weight: 600; color: #333; }
+.oferta-detalhe { margin: 8px 0 20px; color: var(--ink-2); font-size: 1.05rem; font-weight: 600; }
 
 /* Etiqueta de preço: no lugar do R$, a quantidade de indicados */
 .oferta-etiqueta {
@@ -594,8 +598,8 @@ img { max-width: 100%; display: block; }
   gap: 12px;
   margin: auto -24px 0;
   padding: 10px 24px;
-  background: #e30613;
-  color: #fff;
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 .etiqueta-num {
   font-size: clamp(4.5rem, 9vw, 6.5rem);
@@ -604,11 +608,9 @@ img { max-width: 100%; display: block; }
   line-height: .85;
 }
 .etiqueta-txt { font-size: 1.15rem; font-weight: 900; font-stretch: 80%; line-height: 1.05; text-transform: uppercase; }
-.oferta-maior .etiqueta-num { color: #ffd60a; }
 
-.indicacao .botao-indicar { margin-top: 44px; background: #111; color: #ffd60a; }
-.botao-indicar:hover { background: #2a2a2a; }
-.indicacao-regras { margin: 20px 0 0; max-width: 46rem; font-size: .9rem; color: #333; }
+.indicacao .botao-indicar { margin-top: 44px; }
+.indicacao-regras { margin: 20px 0 0; max-width: 46rem; color: var(--muted); font-size: .9rem; }
 
 /* Perguntas */
 .perguntas-grade {
