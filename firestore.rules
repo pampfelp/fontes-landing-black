@@ -1,24 +1,44 @@
 rules_version = '2';
 
-// Landing Black de Outro Mundo (Fontes Energia).
-// Antessala (crença 12): o público anônimo só CRIA um contato com campos
-// exatos e tamanho limitado. Ninguém de fora lê, lista ou apaga.
-// A única mudança permitida depois é gravar UMA vez a escolha da pessoa
-// ("agora" = foi para o WhatsApp, "aguardar" = espera o agente ligar).
-// A equipe lê os contatos pelo console do Firebase (login Google do dono).
+// Landing Black de Outro Mundo + painel de leads (Fontes Energia).
+//
+// leads      antessala (crença 12): o público só CRIA, com campos exatos.
+//            O painel de quem estiver logado distribui pelo rodízio.
+// negocios   base do funil: um por lead, com vendedor e etapa do kanban.
+// usuarios   vínculo de cada login: papel (admin ou vendedor) e ativo.
+// config/rodizio  fila de vendedores ativos e a vez de quem.
+//
+// Cada documento casa com UM match só (antecipação A7: matches se somam).
 service cloud.firestore {
   match /databases/{database}/documents {
 
     function texto(v, minimo, maximo) {
       return v is string && v.size() >= minimo && v.size() <= maximo;
     }
+    function caminho(colecao, id) {
+      return /databases/$(database)/documents/$(colecao)/$(id);
+    }
+    function logado() { return request.auth != null; }
+    function vinculo() { return get(caminho('usuarios', request.auth.uid)).data; }
+    function ativo() {
+      return logado() && exists(caminho('usuarios', request.auth.uid)) && vinculo().ativo == true;
+    }
+    function admin() { return ativo() && vinculo().papel == 'admin'; }
+    function rodizio() { return get(caminho('config', 'rodizio')).data; }
+    function daVez() { return rodizio().fila[rodizio().proximo % rodizio().fila.size()]; }
 
+    function etapaValida(e) {
+      return e in ['Novo Lead', 'Tentativa de Contato', 'Proposta Enviada', 'Negociação',
+                   'Visita Técnica', 'Ganho', 'Perdido'];
+    }
+
+    // ------------------------------------------------------------------
     match /leads/{id} {
       allow create: if
         request.resource.data.keys().hasOnly(
-          ['nome', 'telefone', 'faixa', 'conta', 'imovel', 'fase', 'origem', 'criadoEm'])
+          ['nome', 'telefone', 'faixa', 'conta', 'imovel', 'fase', 'origem', 'criadoEm', 'distribuido'])
         && request.resource.data.keys().hasAll(
-          ['nome', 'telefone', 'faixa', 'imovel', 'fase', 'criadoEm'])
+          ['nome', 'telefone', 'faixa', 'imovel', 'fase', 'criadoEm', 'distribuido'])
         && texto(request.resource.data.nome, 2, 60)
         && request.resource.data.telefone is string
         && request.resource.data.telefone.matches('^[0-9]{10,11}$')
@@ -26,6 +46,7 @@ service cloud.firestore {
         && request.resource.data.imovel in ['casa', 'empresa', 'rural']
         && request.resource.data.fase in ['antes', 'durante', 'depois']
         && request.resource.data.criadoEm == request.time
+        && request.resource.data.distribuido == false
         && (!('conta' in request.resource.data)
             || (request.resource.data.conta is int
                 && request.resource.data.conta >= 1000
@@ -34,12 +55,121 @@ service cloud.firestore {
             || texto(request.resource.data.origem, 0, 300));
 
       allow update: if
-        !('escolha' in resource.data)
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['escolha', 'escolhidoEm'])
-        && request.resource.data.escolha in ['agora', 'aguardar']
-        && request.resource.data.escolhidoEm == request.time;
+        // o público grava UMA vez a escolha do final (agora ou aguardar)
+        (!('escolha' in resource.data)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['escolha', 'escolhidoEm'])
+          && request.resource.data.escolha in ['agora', 'aguardar']
+          && request.resource.data.escolhidoEm == request.time)
+        // a equipe marca como distribuído, junto com o negócio criado
+        || (ativo()
+          && resource.data.get('distribuido', false) == false
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['distribuido'])
+          && request.resource.data.distribuido == true
+          && existsAfter(caminho('negocios', id)));
 
-      allow read, delete: if false;
+      // vendedor só enxerga o que ainda espera distribuição; admin vê tudo
+      allow read: if admin() || (ativo() && resource.data.get('distribuido', true) == false);
+      allow delete: if admin();
+    }
+
+    // ------------------------------------------------------------------
+    match /negocios/{id} {
+      allow read: if admin() || (ativo() && resource.data.vendedorId == request.auth.uid);
+
+      // nasce só da distribuição de um lead, para quem é a vez no rodízio
+      allow create: if ativo()
+        && request.resource.data.keys().hasOnly(
+          ['nome', 'telefone', 'faixa', 'conta', 'imovel', 'fase', 'origem', 'escolha',
+           'leadCriadoEm', 'vendedorId', 'etapa', 'criadoEm', 'atualizadoEm'])
+        && get(caminho('leads', id)).data.get('distribuido', false) == false
+        && getAfter(caminho('leads', id)).data.distribuido == true
+        && request.resource.data.nome == get(caminho('leads', id)).data.nome
+        && request.resource.data.telefone == get(caminho('leads', id)).data.telefone
+        && request.resource.data.etapa == 'Novo Lead'
+        && request.resource.data.criadoEm == request.time
+        && request.resource.data.atualizadoEm == request.time
+        && request.resource.data.vendedorId == daVez()
+        && getAfter(caminho('config', 'rodizio')).data.proximo
+             == (rodizio().proximo + 1) % rodizio().fila.size();
+
+      allow update: if ativo()
+        && request.resource.data.atualizadoEm == request.time
+        && etapaValida(request.resource.data.etapa)
+        && (!('notas' in request.resource.data) || texto(request.resource.data.notas, 0, 3000))
+        && (!('valor' in request.resource.data)
+            || (request.resource.data.valor is number
+                && request.resource.data.valor >= 0
+                && request.resource.data.valor <= 10000000))
+        && (!('motivoPerda' in request.resource.data) || texto(request.resource.data.motivoPerda, 0, 300))
+        && (
+          // admin: muda etapa, anotações e reatribui a outro vendedor ativo
+          (admin()
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['etapa', 'notas', 'valor', 'motivoPerda', 'atualizadoEm', 'vendedorId'])
+            && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['vendedorId'])
+                || get(caminho('usuarios', request.resource.data.vendedorId)).data.ativo == true))
+          // vendedor: só os próprios, sem trocar o dono
+          || (resource.data.vendedorId == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['etapa', 'notas', 'valor', 'motivoPerda', 'atualizadoEm']))
+        );
+
+      allow delete: if admin();
+    }
+
+    // ------------------------------------------------------------------
+    match /usuarios/{uid} {
+      allow read: if ativo() && (request.auth.uid == uid || admin());
+
+      // janela do primeiro admin, amarrada ao e-mail do dono (antecipação A8)
+      allow create: if logado()
+        && request.auth.uid == uid
+        && request.auth.token.email == 'felipecastiged@gmail.com'
+        && request.resource.data.keys().hasOnly(['nome', 'email', 'papel', 'ativo', 'criadoEm'])
+        && texto(request.resource.data.nome, 2, 60)
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.papel == 'admin'
+        && request.resource.data.ativo == true
+        && request.resource.data.criadoEm == request.time;
+
+      // admin cadastra outra pessoa (a conta nasce numa segunda instância do Auth)
+      allow create: if admin()
+        && request.auth.uid != uid
+        && request.resource.data.keys().hasOnly(['nome', 'email', 'papel', 'ativo', 'criadoEm'])
+        && texto(request.resource.data.nome, 2, 60)
+        && texto(request.resource.data.email, 5, 120)
+        && request.resource.data.papel in ['admin', 'vendedor']
+        && request.resource.data.ativo is bool
+        && request.resource.data.criadoEm == request.time;
+
+      // admin edita; ninguém muda o próprio papel nem se pausa (antecipação A7)
+      allow update: if admin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome', 'papel', 'ativo'])
+        && texto(request.resource.data.nome, 2, 60)
+        && request.resource.data.papel in ['admin', 'vendedor']
+        && request.resource.data.ativo is bool
+        && (uid != request.auth.uid
+            || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['papel', 'ativo']));
+
+      allow delete: if false;
+    }
+
+    // ------------------------------------------------------------------
+    match /config/rodizio {
+      allow read: if ativo();
+
+      // admin monta a fila (só vendedores) e a vez
+      allow create, update: if admin()
+        && request.resource.data.keys().hasOnly(['fila', 'proximo'])
+        && request.resource.data.fila is list
+        && request.resource.data.fila.size() <= 50
+        && request.resource.data.proximo is int
+        && request.resource.data.proximo >= 0;
+
+      // qualquer pessoa da equipe avança a vez, só junto com um negócio novo
+      allow update: if ativo()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['proximo'])
+        && request.resource.data.proximo == (resource.data.proximo + 1) % resource.data.fila.size();
     }
   }
 }
