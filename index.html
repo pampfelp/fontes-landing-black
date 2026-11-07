@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=15">
+  <link rel="stylesheet" href="style.css?v=17">
 </head>
 <!-- Número de WhatsApp da Fontes: só dígitos, com 55 e DDD (ex.: 5591999999999).
      Datas da campanha no horário de Brasília (-03:00): a página entra no ar dia 10/11 em
@@ -36,7 +36,7 @@
       </div>
 
       <form class="investigacao" id="investigacao" novalidate>
-        <!-- Etapa 1: faixa da conta -->
+        <!-- Etapa 1: faixa da conta (acima de R$ 1.000 abre a régua) -->
         <div class="etapa" data-etapa="1">
           <h2 tabindex="-1">Investigação da conta</h2>
           <fieldset>
@@ -48,51 +48,88 @@
               <label class="opcao"><input type="radio" name="faixa" value="1000-mais"><span>Mais de R$ 1.000</span></label>
             </div>
           </fieldset>
+          <div class="regua" hidden>
+            <output class="regua-valor" for="conta" aria-live="polite">R$ 1.000</output>
+            <input type="range" id="conta" name="conta" min="1000" max="5000" step="50" value="1000" aria-label="Valor da sua conta de luz por mês">
+            <p class="regua-dica">Arraste para mostrar quanto você gasta</p>
+          </div>
           <p class="investigacao-aviso" role="alert" hidden>Escolha a faixa da sua conta para começar.</p>
           <button type="button" class="botao" data-avancar="2" data-texto-fase="botao">Investigar minha conta</button>
           <p class="investigacao-nota">Resposta imediata, todos os dias</p>
         </div>
 
-        <!-- Etapa 2: tipo de imóvel -->
+        <!-- Etapa 2: para quem é a conta -->
         <div class="etapa" data-etapa="2" hidden>
-          <h2 tabindex="-1">Onde fica essa conta?</h2>
+          <h2 tabindex="-1">Essa conta é para:</h2>
           <fieldset>
             <legend class="sr">Tipo de imóvel</legend>
             <div class="opcoes opcoes-1">
-              <label class="opcao"><input type="radio" name="imovel" value="casa"><span>Casa ou apartamento</span></label>
-              <label class="opcao"><input type="radio" name="imovel" value="empresa"><span>Comércio ou empresa</span></label>
-              <label class="opcao"><input type="radio" name="imovel" value="rural"><span>Área rural</span></label>
+              <label class="opcao"><input type="radio" name="imovel" value="casa"><span>Minha casa/apartamento</span></label>
+              <label class="opcao"><input type="radio" name="imovel" value="empresa"><span>Meu comércio ou empresa</span></label>
+              <label class="opcao"><input type="radio" name="imovel" value="rural"><span>Na minha área rural</span></label>
             </div>
           </fieldset>
-          <p class="investigacao-aviso" role="alert" hidden>Escolha onde fica a conta.</p>
+          <p class="investigacao-aviso" role="alert" hidden>Escolha para quem é a conta.</p>
           <button type="button" class="botao" data-avancar="3">Continuar a investigação</button>
           <button type="button" class="voltar" data-voltar="1">Voltar</button>
         </div>
 
-        <!-- Etapa 3: varredura e resultado -->
+        <!-- Etapa 3: varredura, resultado e nome -->
         <div class="etapa" data-etapa="3" hidden>
           <div class="varredura" aria-live="polite">
             <div class="varredura-feixe" aria-hidden="true"></div>
             <p class="varredura-texto">Investigando a conta…</p>
           </div>
           <div class="resultado" hidden>
-            <h2 tabindex="-1" class="resultado-valor"></h2>
-            <p class="resultado-sub">Um agente vai mostrar quanto disso dá para cortar com energia solar no seu caso.</p>
+            <h2 tabindex="-1" class="resultado-paga"></h2>
+            <p class="resultado-pode"></p>
             <label class="campo">
-              <span>Seu nome</span>
-              <input type="text" name="nome" autocomplete="given-name" maxlength="60" required>
+              <span>Diga seu nome para um de nossos agentes te explicar como.</span>
+              <input type="text" name="nome" autocomplete="given-name" maxlength="60">
             </label>
             <p class="investigacao-aviso" role="alert" hidden>Escreva seu nome para o agente saber com quem fala.</p>
-            <button type="submit" class="botao" data-texto-fase="enviar">Receber no WhatsApp</button>
-            <p class="investigacao-nota">Abre uma conversa com a Fontes Energia. Resposta imediata, todos os dias.</p>
+            <button type="button" class="botao" data-avancar="4">Continuar</button>
           </div>
         </div>
 
-        <!-- Etapa 4: obrigado e missão extra -->
+        <!-- Etapa 4: contato -->
         <div class="etapa" data-etapa="4" hidden>
-          <h2 tabindex="-1" class="obrigado-titulo">Investigação aberta.</h2>
-          <p class="resultado-sub">Mande a mensagem que abriu no WhatsApp e um agente assume o caso.</p>
+          <h2 tabindex="-1">Com qual contato nossos agentes falam com você?</h2>
+          <label class="campo">
+            <span>WhatsApp com DDD</span>
+            <input type="tel" name="telefone" autocomplete="tel-national" inputmode="numeric" maxlength="16" placeholder="(91) 99999-9999">
+          </label>
+          <!-- Campo isca contra robôs: pessoas não veem nem preenchem -->
+          <label class="isca" aria-hidden="true">Site <input type="text" name="site" tabindex="-1" autocomplete="off"></label>
+          <p class="investigacao-aviso" role="alert" hidden>Confira o número: precisa do DDD e de 8 ou 9 dígitos.</p>
+          <button type="submit" class="botao">Enviar aos agentes</button>
+          <p class="investigacao-nota">Usamos seu número só para falar sobre a sua conta de luz.</p>
+        </div>
+
+        <!-- Etapa 5: escolha -->
+        <div class="etapa" data-etapa="5" hidden>
+          <h2 tabindex="-1" class="registrado-titulo">Investigação registrada.</h2>
+          <p class="resultado-sub">Como você quer seguir?</p>
+          <button type="button" class="botao" data-escolha="agora">Quero resolver agora</button>
+          <button type="button" class="botao botao-contorno" data-escolha="aguardar">Vou aguardar o contato dos agentes</button>
+        </div>
+
+        <!-- Etapa 6: resolver agora (WhatsApp) -->
+        <div class="etapa" data-etapa="6" hidden>
+          <h2 tabindex="-1">Sua condição especial está logo à frente.</h2>
+          <p class="resultado-sub">Continue a conversa no WhatsApp que acabou de abrir. Um agente assume o caso.</p>
           <a class="botao botao-link" href="#" data-wa="lead">Abrir o WhatsApp de novo</a>
+          <div class="missao-extra">
+            <h3>Missão extra</h3>
+            <p>Indique quem também paga caro de luz. Dois indicados com contrato fechado valem um ar-condicionado split. Três valem uma viagem para dois.</p>
+            <a class="link-verde" href="#" data-wa="indicar">Indicar pelo WhatsApp</a>
+          </div>
+        </div>
+
+        <!-- Etapa 7: aguardar o agente -->
+        <div class="etapa" data-etapa="7" hidden>
+          <h2 tabindex="-1">Essa missão é ultra secreta.</h2>
+          <p class="resultado-sub">Aguarde um agente. Ele vai te chamar no número que você deixou.</p>
           <div class="missao-extra">
             <h3>Missão extra</h3>
             <p>Indique quem também paga caro de luz. Dois indicados com contrato fechado valem um ar-condicionado split. Três valem uma viagem para dois.</p>
@@ -225,6 +262,6 @@
     <span>Falar com um agente</span>
   </a>
 
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=10"></script>
 </body>
 </html>

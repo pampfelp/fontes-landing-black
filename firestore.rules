@@ -1,0 +1,45 @@
+rules_version = '2';
+
+// Landing Black de Outro Mundo (Fontes Energia).
+// Antessala (crença 12): o público anônimo só CRIA um contato com campos
+// exatos e tamanho limitado. Ninguém de fora lê, lista ou apaga.
+// A única mudança permitida depois é gravar UMA vez a escolha da pessoa
+// ("agora" = foi para o WhatsApp, "aguardar" = espera o agente ligar).
+// A equipe lê os contatos pelo console do Firebase (login Google do dono).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function texto(v, minimo, maximo) {
+      return v is string && v.size() >= minimo && v.size() <= maximo;
+    }
+
+    match /leads/{id} {
+      allow create: if
+        request.resource.data.keys().hasOnly(
+          ['nome', 'telefone', 'faixa', 'conta', 'imovel', 'fase', 'origem', 'criadoEm'])
+        && request.resource.data.keys().hasAll(
+          ['nome', 'telefone', 'faixa', 'imovel', 'fase', 'criadoEm'])
+        && texto(request.resource.data.nome, 2, 60)
+        && request.resource.data.telefone is string
+        && request.resource.data.telefone.matches('^[0-9]{10,11}$')
+        && request.resource.data.faixa in ['ate-300', '300-600', '600-1000', '1000-mais']
+        && request.resource.data.imovel in ['casa', 'empresa', 'rural']
+        && request.resource.data.fase in ['antes', 'durante', 'depois']
+        && request.resource.data.criadoEm == request.time
+        && (!('conta' in request.resource.data)
+            || (request.resource.data.conta is int
+                && request.resource.data.conta >= 1000
+                && request.resource.data.conta <= 5000))
+        && (!('origem' in request.resource.data)
+            || texto(request.resource.data.origem, 0, 300));
+
+      allow update: if
+        !('escolha' in resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['escolha', 'escolhidoEm'])
+        && request.resource.data.escolha in ['agora', 'aguardar']
+        && request.resource.data.escolhidoEm == request.time;
+
+      allow read, delete: if false;
+    }
+  }
+}

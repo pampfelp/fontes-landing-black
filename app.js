@@ -1,28 +1,63 @@
 // Landing Black de Outro Mundo (Fontes Energia).
-// Investigação em quatro etapas dentro do cartão: faixa, imóvel, resultado com
-// nome e obrigado. Sem servidor: o contato chega à Fontes pelo WhatsApp.
+// Investigação dentro do cartão: faixa (ou régua acima de R$ 1.000), para quem
+// é a conta, varredura com o resultado e o nome, contato, escolha entre
+// resolver agora (WhatsApp) e aguardar o agente. O contato vai para o
+// Firestore (coleção leads, só criação; ver firestore.rules).
 
 const NUMERO = (document.body.dataset.whatsapp || '').replace(/\D/g, '');
 if (!NUMERO) console.warn('[landing] número de WhatsApp da Fontes não configurado (data-whatsapp no <body>)');
 
+// ---------------------------------------------------------------------------
+// Cálculo da conta (regra do Felipe, 07/11)
+// Conta = iluminação pública + energia. Energia ÷ tarifa = kWh.
+// Com 100% do consumo compensado pela energia solar, sobra pagar o Fio B
+// (a 65%, R$ 0,30 por kWh) mais a iluminação pública.
+// Exemplo: R$ 600 com R$ 112 de iluminação → 488 ÷ 1,30 = 375 kWh →
+// Fio B 375 × 0,30 = 112,50 → nova conta 112,50 + 112 = R$ 224,50.
+const TARIFA_KWH = 1.30;   // R$ por kWh com impostos (Equatorial Pará)
+const FIO_B_KWH = 0.30;    // R$ por kWh de Fio B que continua sendo pago
+
+// Iluminação pública de Belém (COSIP, Lei 10.113/2024, cobrada pela Equatorial).
+// PROVISÓRIO: o anexo com as faixas não foi encontrado. Até a tabela chegar,
+// usa a proporção do exemplo do Felipe (R$ 112 numa conta de R$ 600).
+// Para usar a tabela: COSIP_FAIXAS = [{ ateKwh: 30, valor: 0 }, { ateKwh: 100, valor: 9.5 }, ...]
+// com a última faixa em ateKwh: Infinity.
+const COSIP_FAIXAS = null;
+const COSIP_PROPORCAO = 112 / 600;
+
+function iluminacaoPublica(conta) {
+  if (!COSIP_FAIXAS) return conta * COSIP_PROPORCAO;
+  for (const faixa of COSIP_FAIXAS) {
+    const kwh = (conta - faixa.valor) / TARIFA_KWH;
+    if (kwh <= faixa.ateKwh) return faixa.valor;
+  }
+  return COSIP_FAIXAS[COSIP_FAIXAS.length - 1].valor;
+}
+
+function contaComSolar(conta) {
+  const iluminacao = iluminacaoPublica(conta);
+  const kwh = Math.max(0, conta - iluminacao) / TARIFA_KWH;
+  return iluminacao + kwh * FIO_B_KWH;
+}
+
+const reais = (v) => `R$ ${Math.round(v).toLocaleString('pt-BR')}`;
+
+// Faixas: limites usados no cálculo e textos da mensagem
 const FAIXAS = {
-  'ate-300':   { mes: 'até R$ 300',        ano: 'até R$ 3.600' },
-  '300-600':   { mes: 'de R$ 300 a 600',   ano: 'entre R$ 3.600 e R$ 7.200' },
-  '600-1000':  { mes: 'de R$ 600 a 1.000', ano: 'entre R$ 7.200 e R$ 12.000' },
-  '1000-mais': { mes: 'acima de R$ 1.000', ano: 'mais de R$ 12.000' }
+  'ate-300':   { de: null, ate: 300,  mes: 'até R$ 300' },
+  '300-600':   { de: 300,  ate: 600,  mes: 'de R$ 300 a 600' },
+  '600-1000':  { de: 600,  ate: 1000, mes: 'de R$ 600 a 1.000' }
 };
 const IMOVEIS = { casa: 'casa ou apartamento', empresa: 'comércio ou empresa', rural: 'área rural' };
 
+// ---------------------------------------------------------------------------
 // Fases da campanha: antes do lançamento, durante a Black e depois do fim.
-// Textos são proposta: a Fontes aprova antes de publicar.
 const NOME_CAMPANHA = '<em>Black de Outro Mundo</em>';
 const FASES = {
   antes: {
     titulo: `A ${NOME_CAMPANHA} começa em`,
     contagemSub: 'Reserve sua vaga agora e um agente te chama no WhatsApp quando abrir.',
     botao: 'Reservar minha vaga',
-    enviar: 'Reservar pelo WhatsApp',
-    obrigado: 'Vaga reservada',
     pedido: 'Quero reservar minha vaga.',
     maleta: 'As condições da Black são passadas pelo agente no WhatsApp quando a campanha abrir.',
     fechamento: 'A Black de Outro Mundo está chegando. Reserve sua vaga antes de abrir.'
@@ -31,8 +66,6 @@ const FASES = {
     titulo: `As condições especiais da ${NOME_CAMPANHA} vão encerrar em`,
     contagemSub: 'Descubra a sua oferta antes que o tempo acabe.',
     botao: 'Descobrir minha oferta',
-    enviar: 'Receber minha oferta no WhatsApp',
-    obrigado: 'Investigação aberta',
     pedido: 'Quero descobrir a minha oferta.',
     maleta: 'As condições de novembro são passadas pelo agente no WhatsApp.',
     fechamento: 'As condições da Black de Outro Mundo valem por tempo limitado.'
@@ -41,8 +74,6 @@ const FASES = {
     titulo: `As condições da ${NOME_CAMPANHA} encerraram`,
     contagemSub: 'Os agentes continuam investigando contas. Deixe seu nome e um agente te chama no WhatsApp.',
     botao: 'Quero ser atendido',
-    enviar: 'Receber no WhatsApp',
-    obrigado: 'Cadastro feito',
     pedido: 'Quero saber quanto economizo com energia solar.',
     maleta: 'As condições da Black encerraram. O agente passa as condições atuais no WhatsApp.',
     fechamento: 'A Black de Outro Mundo encerrou, mas ainda dá para investigar a sua conta.'
@@ -51,7 +82,7 @@ const FASES = {
 
 const LANCAMENTO = Date.parse(document.body.dataset.lancamento || '');
 const ENCERRAMENTO = Date.parse(document.body.dataset.encerramento || '');
-// ?agora=2026-11-15T10:00 simula outra data e hora de Brasília (para conferir os cenários)
+// ?agora=2026-11-15T10:00 simula outra data e hora de Brasília (para conferir os cenários).
 // Só aceita data completa: sem o parâmetro, "null" virava 01/01/2000 em alguns navegadores
 const PEDIDA = new URLSearchParams(location.search).get('agora') || '';
 const SIMULADA = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(PEDIDA) ? Date.parse(`${PEDIDA}:00-03:00`) : NaN;
@@ -66,24 +97,73 @@ function faseAgora(agora = relogioAgora()) {
 
 let fase = faseAgora();
 
+// ---------------------------------------------------------------------------
+// Firestore (SDK lite, carregado só quando precisa). Config pública por design.
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyBA6ucG2zQ5gEFzvQ0n3gwleVb8fbj4FjA',
+  authDomain: 'fontes-landing-black.firebaseapp.com',
+  projectId: 'fontes-landing-black',
+  storageBucket: 'fontes-landing-black.firebasestorage.app',
+  messagingSenderId: '15871244062',
+  appId: '1:15871244062:web:4698d2c0a7d8036b1efb0f'
+};
+const SDK = 'https://www.gstatic.com/firebasejs/12.16.0';
+let firestore = null;
+
+function carregarFirestore() {
+  if (!firestore) {
+    firestore = Promise.all([
+      import(`${SDK}/firebase-app.js`),
+      import(`${SDK}/firebase-firestore-lite.js`)
+    ]).then(([app, fs]) => ({ fs, db: fs.getFirestore(app.initializeApp(FIREBASE_CONFIG)) }));
+    firestore.catch(() => { firestore = null; });
+  }
+  return firestore;
+}
+
+let leadId = null;
+
+async function salvarLead(dados) {
+  const { fs, db } = await carregarFirestore();
+  const ref = fs.doc(fs.collection(db, 'leads'));
+  await fs.setDoc(ref, { ...dados, criadoEm: fs.serverTimestamp() });
+  return ref.id;
+}
+
+async function salvarEscolha(escolha) {
+  if (!leadId) return;
+  const { fs, db } = await carregarFirestore();
+  await fs.updateDoc(fs.doc(db, 'leads', leadId), { escolha, escolhidoEm: fs.serverTimestamp() });
+}
+
+// ---------------------------------------------------------------------------
 const form = document.getElementById('investigacao');
 const etapas = [...form.querySelectorAll('.etapa')];
 const reduzMovimento = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const regua = form.querySelector('.regua');
+const reguaValor = form.querySelector('.regua-valor');
 
 const valor = (nome) => form.querySelector(`input[name="${nome}"]:checked`)?.value;
+const contaRegua = () => Number(form.conta.value);
+const digitos = (v) => v.replace(/\D/g, '');
 
 function linkWhatsApp(texto, numero = NUMERO) {
   return `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
 }
 
+function contaPorMes() {
+  const faixa = valor('faixa');
+  return faixa === '1000-mais' ? reais(contaRegua()) : FAIXAS[faixa].mes;
+}
+
 function mensagemLead() {
   const nome = form.nome.value.trim();
   return `Olá! Sou ${nome}. Fiz a investigação da conta na Black de Outro Mundo: ` +
-    `minha conta vem ${FAIXAS[valor('faixa')].mes} por mês, em ${IMOVEIS[valor('imovel')]}. ` +
+    `minha conta vem ${contaPorMes()} por mês, em ${IMOVEIS[valor('imovel')]}. ` +
     FASES[fase].pedido;
 }
 
-const textos = {
+const textosWhatsApp = {
   agente: () => 'Olá! Vim pela Black de Outro Mundo e quero falar com um agente sobre energia solar.',
   lead: mensagemLead,
   indicar: () => `Olhe isso: a Fontes Energia investiga sua conta de luz de graça e mostra quanto dá para economizar com energia solar. ${location.origin}${location.pathname}`
@@ -95,7 +175,7 @@ document.addEventListener('click', (e) => {
   if (!link) return;
   e.preventDefault();
   const tipo = link.dataset.wa;
-  const url = tipo === 'indicar' ? linkWhatsApp(textos.indicar(), '') : linkWhatsApp(textos[tipo]());
+  const url = tipo === 'indicar' ? linkWhatsApp(textosWhatsApp.indicar(), '') : linkWhatsApp(textosWhatsApp[tipo]());
   window.open(url, '_blank', 'noopener');
 });
 
@@ -103,23 +183,51 @@ function mostrarEtapa(n) {
   etapas.forEach((el) => { el.hidden = el.dataset.etapa !== String(n); });
   const atual = etapas.find((el) => el.dataset.etapa === String(n));
   atual.querySelectorAll('.investigacao-aviso').forEach((a) => { a.hidden = true; });
-  const titulo = atual.querySelector('h2:not([hidden])');
+  const titulo = atual.querySelector('h2');
   if (titulo && titulo.offsetParent) titulo.focus({ preventScroll: true });
 }
 
-function avisar(etapa) {
+function avisar(etapa, texto) {
   const aviso = etapa.querySelector('.investigacao-aviso');
+  if (texto) aviso.textContent = texto;
   aviso.hidden = false;
+}
+
+// Régua: aparece só em "Mais de R$ 1.000"
+function atualizarRegua() {
+  regua.hidden = valor('faixa') !== '1000-mais';
+  reguaValor.textContent = reais(contaRegua());
+  const pct = ((contaRegua() - 1000) / 4000) * 100;
+  form.conta.style.setProperty('--preenchido', `${pct}%`);
+}
+
+function textoResultado() {
+  const faixa = valor('faixa');
+  if (faixa === '1000-mais') {
+    const conta = contaRegua();
+    return [`Você paga ${reais(conta)} por mês.`, `Poderia estar pagando ${reais(contaComSolar(conta))}.`];
+  }
+  const { de, ate } = FAIXAS[faixa];
+  if (de === null) {
+    return [`Você paga até ${reais(ate)} por mês.`, `Poderia estar pagando até ${reais(contaComSolar(ate))}.`];
+  }
+  return [
+    `Você paga entre ${reais(de)} e ${reais(ate)} por mês.`,
+    `Poderia estar pagando entre ${reais(contaComSolar(de))} e ${reais(contaComSolar(ate))}.`
+  ];
 }
 
 function varrer() {
   const etapa = form.querySelector('[data-etapa="3"]');
   const varredura = etapa.querySelector('.varredura');
   const resultado = etapa.querySelector('.resultado');
-  resultado.querySelector('.resultado-valor').textContent = `Você paga ${FAIXAS[valor('faixa')].ano} de luz por ano.`;
+  const [paga, pode] = textoResultado();
+  resultado.querySelector('.resultado-paga').textContent = paga;
+  resultado.querySelector('.resultado-pode').textContent = pode;
   varredura.hidden = false;
   resultado.hidden = true;
   mostrarEtapa(3);
+  carregarFirestore().catch(() => {});
   setTimeout(() => {
     varredura.hidden = true;
     resultado.hidden = false;
@@ -127,14 +235,31 @@ function varrer() {
   }, reduzMovimento ? 0 : 1600);
 }
 
+// Telefone com máscara (91) 99999-9999
+form.telefone.addEventListener('input', () => {
+  const d = digitos(form.telefone.value).slice(0, 11);
+  let v = d;
+  if (d.length > 2) v = `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length > 7) v = `(${d.slice(0, 2)}) ${d.slice(2, d.length - 4)}-${d.slice(-4)}`;
+  form.telefone.value = v;
+});
+
+form.addEventListener('input', (e) => {
+  if (e.target === form.conta) atualizarRegua();
+  if (e.isTrusted) e.target.closest('.etapa')?.querySelectorAll('.investigacao-aviso').forEach((a) => { a.hidden = true; });
+});
+
 form.addEventListener('change', (e) => {
+  if (e.target.name === 'faixa') atualizarRegua();
   e.target.closest('.etapa')?.querySelectorAll('.investigacao-aviso').forEach((a) => { a.hidden = true; });
 });
 
 form.addEventListener('click', (e) => {
   const avancar = e.target.closest('[data-avancar]');
   const voltar = e.target.closest('[data-voltar]');
+  const escolha = e.target.closest('[data-escolha]');
   if (voltar) { mostrarEtapa(voltar.dataset.voltar); return; }
+  if (escolha) { escolher(escolha.dataset.escolha); return; }
   if (!avancar) return;
   const etapa = avancar.closest('.etapa');
   if (etapa.dataset.etapa === '1') {
@@ -143,19 +268,68 @@ form.addEventListener('click', (e) => {
   } else if (etapa.dataset.etapa === '2') {
     if (!valor('imovel')) { avisar(etapa); return; }
     varrer();
+  } else if (etapa.dataset.etapa === '3') {
+    if (form.nome.value.trim().length < 2) { avisar(etapa); form.nome.focus(); return; }
+    mostrarEtapa(4);
   }
 });
 
-form.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const etapa = form.querySelector('[data-etapa="3"]');
-  const nome = form.nome.value.trim();
-  if (!nome) { avisar(etapa.querySelector('.resultado')); form.nome.focus(); return; }
-  window.open(linkWhatsApp(mensagemLead()), '_blank', 'noopener');
-  const primeiro = nome.split(/\s+/)[0];
-  form.querySelector('.obrigado-titulo').textContent = `${FASES[fase].obrigado}, ${primeiro}.`;
-  mostrarEtapa(4);
+form.nome.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); form.querySelector('[data-avancar="4"]').click(); }
 });
+
+let enviando = false;
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const etapa = form.querySelector('[data-etapa="4"]');
+  const telefone = digitos(form.telefone.value);
+  if (telefone.length < 10 || telefone.length > 11) { avisar(etapa, 'Confira o número: precisa do DDD e de 8 ou 9 dígitos.'); form.telefone.focus(); return; }
+  if (enviando) return;
+
+  const nome = form.nome.value.trim();
+  const primeiro = nome.split(/\s+/)[0];
+  form.querySelector('.registrado-titulo').textContent = `Investigação registrada, ${primeiro}.`;
+
+  // Robô preencheu o campo isca: finge que deu certo e não grava nada
+  if (form.site.value) { mostrarEtapa(5); return; }
+
+  const dados = {
+    nome: nome.slice(0, 60),
+    telefone,
+    faixa: valor('faixa'),
+    imovel: valor('imovel'),
+    fase
+  };
+  if (dados.faixa === '1000-mais') dados.conta = contaRegua();
+  if (location.search) dados.origem = location.search.slice(0, 300);
+
+  const botao = etapa.querySelector('[type="submit"]');
+  enviando = true;
+  botao.disabled = true;
+  botao.textContent = 'Enviando…';
+  try {
+    leadId = await salvarLead(dados);
+    mostrarEtapa(5);
+  } catch (erro) {
+    console.error('[landing] falha ao gravar o contato', erro);
+    avisar(etapa, 'Não consegui enviar agora. Confira a internet e tente de novo.');
+  } finally {
+    enviando = false;
+    botao.disabled = false;
+    botao.textContent = 'Enviar aos agentes';
+  }
+});
+
+function escolher(escolha) {
+  if (escolha === 'agora') {
+    window.open(linkWhatsApp(mensagemLead()), '_blank', 'noopener');
+    mostrarEtapa(6);
+  } else {
+    mostrarEtapa(7);
+  }
+  salvarEscolha(escolha).catch((erro) => console.error('[landing] falha ao gravar a escolha', erro));
+}
 
 // Botões que levam de volta à investigação: rola até o cartão e foca a etapa
 document.querySelectorAll('[data-ir-investigacao]').forEach((a) => {
@@ -173,6 +347,7 @@ new IntersectionObserver(([entrada]) => {
   flutuante.hidden = entrada.isIntersecting;
 }, { threshold: 0 }).observe(form);
 
+// ---------------------------------------------------------------------------
 // Contagem: dias, horas, minutos e segundos até o lançamento (antes) ou o fim (durante)
 const contagem = document.querySelector('.contagem');
 const relogio = contagem.querySelector('.contagem-relogio');
@@ -222,5 +397,6 @@ function atualizarContagem() {
 if (Number.isNaN(LANCAMENTO) || Number.isNaN(ENCERRAMENTO)) {
   console.warn('[landing] datas da campanha inválidas (data-lancamento e data-encerramento no <body>)');
 }
+atualizarRegua();
 atualizarContagem();
 setInterval(atualizarContagem, 250);
