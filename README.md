@@ -22,6 +22,12 @@ Técnica, Ganho, Perdido), cadastro de vendedores e rodízio.
   As regras conferem que é mesmo a vez daquele vendedor.
 - Vendedor vê e move só os próprios leads. Administrador vê tudo, reatribui,
   cadastra pessoas, pausa e muda a ordem da fila.
+- Indicação: cada lead ganha um código; o "Indicar pelo WhatsApp" manda o
+  link com `?ind=código`, e quem chega por ele grava `indicadoPor`. O card
+  mostra quem indicou e, para o admin, quantos cada um indicou, quantos
+  fecharam (Ganho) e o prêmio alcançado (2 = ar-condicionado, 3 = viagem).
+- Admin exclui um lead pelo detalhe do card ("Excluir lead"): some o negócio
+  e o contato original.
 - Primeiro acesso: só o e-mail do dono nasce administrador
   ("Primeiro acesso do administrador" na tela de entrada).
 - Banco: Firebase `fontes-landing-black` (Firestore em São Paulo).

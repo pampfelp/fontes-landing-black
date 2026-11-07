@@ -121,6 +121,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
   text-underline-offset: 3px;
 }
 .link:hover { color: var(--ink); }
+.link-perigo { margin-top: 20px; color: var(--alerta); }
+.link-perigo:hover { color: var(--alerta); }
 
 /* Barra do aplicativo */
 .barra {
@@ -229,6 +231,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .card .card-meta { color: var(--muted); }
 .card .card-vendedor { color: var(--accent); font-weight: 600; }
 .card .card-valor { color: var(--ink); font-weight: 700; }
+.card .card-indicacao { color: var(--ink-2); font-size: .85rem; }
 
 /* WhatsApp dos agentes */
 .contato {

@@ -9,7 +9,7 @@ const {
 } = await import(`${SDK}/firebase-auth.js`);
 const {
   getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, onSnapshot,
-  runTransaction, serverTimestamp
+  runTransaction, serverTimestamp, writeBatch
 } = await import(`${SDK}/firebase-firestore.js`);
 
 const CONFIG = {
@@ -76,6 +76,24 @@ const dataHora = (ts) => dataDe(ts)?.toLocaleString('pt-BR', { dateStyle: 'short
 
 function esc(t) {
   return String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// ---------------------------------------------------------------------------
+// Indicação: o lead que veio pelo link de alguém traz indicadoPor = código de
+// quem indicou. Prêmio pelo maior nível alcançado (regras da landing):
+// 2 indicados com contrato fechado (Ganho) = ar-condicionado; 3 = viagem.
+function quemIndicou(n) {
+  if (!n.indicadoPor) return null;
+  return [...estado.negocios.values()].find((o) => o.codigo === n.indicadoPor)
+    || [...estado.pendentes.values()].find((o) => o.codigo === n.indicadoPor)
+    || null;
+}
+
+function indicacoesDe(n) {
+  const indicados = n.codigo ? [...estado.negocios.values()].filter((o) => o.indicadoPor === n.codigo) : [];
+  const fechados = indicados.filter((o) => o.etapa === 'Ganho').length;
+  const premio = fechados >= 3 ? 'Viagem para dois' : fechados >= 2 ? 'Ar-condicionado split' : '';
+  return { indicados, fechados, premio };
 }
 
 function nomeDe(uid) {
@@ -364,6 +382,8 @@ async function distribuir(leadId) {
     if (l.conta) negocio.conta = l.conta;
     if (l.origem) negocio.origem = l.origem;
     if (l.escolha) negocio.escolha = l.escolha;
+    if (l.codigo) negocio.codigo = l.codigo;
+    if (l.indicadoPor) negocio.indicadoPor = l.indicadoPor;
     tx.set(doc(db, 'negocios', leadId), negocio);
     tx.update(refLead, { distribuido: true });
     tx.update(refRodizio, { proximo: (proximo + 1) % fila.length });
@@ -415,6 +435,7 @@ function desenharFunil() {
     ['Conversão', conversao === null ? '–' : `${conversao}%`],
     ['Vendido', valorGanho ? reais(valorGanho) : '–']
   ];
+  kpis.push(['Por indicação', lista.filter((n) => n.indicadoPor).length]);
   if (ehAdmin()) kpis.push(['Aguardando distribuição', estado.pendentes.size]);
   $('#kpis-funil').innerHTML = kpis.map(([r, v]) => `<div><dt>${esc(r)}</dt><dd>${esc(v)}</dd></div>`).join('');
 
@@ -441,11 +462,19 @@ function desenharFunil() {
 }
 
 function cartaoNegocio(n) {
+  const quem = quemIndicou(n);
+  const ind = ehAdmin() ? indicacoesDe(n) : null;
+  const linhasIndicacao = [];
+  if (n.indicadoPor) linhasIndicacao.push(quem ? `Indicado por ${quem.nome}` : 'Veio por indicação');
+  if (ind?.indicados.length) {
+    linhasIndicacao.push(`Indicou ${ind.indicados.length} · ${ind.fechados} fechado${ind.fechados === 1 ? '' : 's'}${ind.premio ? ` · ${ind.premio}` : ''}`);
+  }
   return `
     <article class="card" draggable="true" data-id="${esc(n.id)}" tabindex="0" aria-label="${esc(n.nome)}, ${esc(contaTexto(n))}">
       <h3>${esc(n.nome)}</h3>
       <p class="card-conta">${esc(contaTexto(n))}</p>
       <p class="card-meta">${esc(IMOVEIS[n.imovel] || '')} · ${esc(haQuanto(n.leadCriadoEm || n.criadoEm))}</p>
+      ${linhasIndicacao.map((t) => `<p class="card-indicacao">${esc(t)}</p>`).join('')}
       ${ehAdmin() ? `<p class="card-vendedor">${esc(nomeDe(n.vendedorId))}</p>` : ''}
       ${n.valor ? `<p class="card-valor">${esc(reais(n.valor))}</p>` : ''}
     </article>`;
@@ -537,6 +566,17 @@ function atualizarModalAberto() {
     ['Vendedor', nomeDe(n.vendedorId)],
     ['Última mudança', dataHora(n.atualizadoEm)]
   ];
+  if (n.indicadoPor) {
+    const quem = quemIndicou(n);
+    linhas.push(['Indicado por', quem ? `${quem.nome} (${telefoneBonito(quem.telefone)})` : 'Outro cliente, ainda não visível para você']);
+  }
+  if (ehAdmin()) {
+    const { indicados, fechados, premio } = indicacoesDe(n);
+    linhas.push(['Indicações', indicados.length
+      ? `${indicados.map((o) => `${o.nome} (${o.etapa})`).join(', ')}. ${fechados} com contrato fechado.`
+      : 'Nenhuma ainda']);
+    if (premio) linhas.push(['Prêmio alcançado', premio]);
+  }
   if (n.origem) linhas.push(['Origem (UTM)', n.origem]);
   $('#neg-dados').innerHTML = linhas.map(([r, v]) => `<div><dt>${esc(r)}</dt><dd>${esc(v)}</dd></div>`).join('');
   if (formNegocio.etapa.disabled) preencherFormNegocio(n);
@@ -576,6 +616,33 @@ formNegocio.addEventListener('click', (e) => {
   const acao = e.target.closest('[data-acao]')?.dataset.acao;
   if (acao === 'editar-negocio') modoEdicao(true);
   if (acao === 'cancelar-negocio') modoEdicao(false);
+});
+
+// Excluir lead (só admin; as regras também barram o vendedor). Apaga o negócio
+// e o contato original da landing. A mesma pessoa pode se registrar de novo.
+$('[data-acao="excluir-negocio"]', modalNegocio).addEventListener('click', async () => {
+  const n = estado.negocios.get(estado.aberto);
+  if (!n || !ehAdmin()) return;
+  const ok = await confirmar(`Excluir ${n.nome}?`,
+    'O lead sai do funil e do banco, com etapa, valor e anotações. Não dá para desfazer.', 'Excluir');
+  if (!ok) return;
+  // Feedback imediato (crença 11); volta se o banco recusar
+  fecharModal(modalNegocio);
+  estado.negocios.delete(n.id);
+  desenharFunil();
+  desenharEquipe();
+  try {
+    const lote = writeBatch(db);
+    lote.delete(doc(db, 'negocios', n.id));
+    lote.delete(doc(db, 'leads', n.id));
+    await lote.commit();
+    avisarToast(`${n.nome} foi excluído.`);
+  } catch (erro) {
+    estado.negocios.set(n.id, n);
+    desenharFunil();
+    desenharEquipe();
+    avisarToast(erroLegivel(erro));
+  }
 });
 
 formNegocio.addEventListener('submit', async (e) => {

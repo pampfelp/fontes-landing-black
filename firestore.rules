@@ -41,7 +41,8 @@ service cloud.firestore {
         id.matches('^' + request.resource.data.telefone + '-[a-z0-9-]{1,60}$')
         &&
         request.resource.data.keys().hasOnly(
-          ['nome', 'telefone', 'faixa', 'conta', 'imovel', 'fase', 'origem', 'criadoEm', 'distribuido'])
+          ['nome', 'telefone', 'faixa', 'conta', 'imovel', 'fase', 'origem', 'criadoEm', 'distribuido',
+           'codigo', 'indicadoPor'])
         && request.resource.data.keys().hasAll(
           ['nome', 'telefone', 'faixa', 'imovel', 'fase', 'criadoEm', 'distribuido'])
         && texto(request.resource.data.nome, 2, 60)
@@ -57,7 +58,15 @@ service cloud.firestore {
                 && request.resource.data.conta >= 1000
                 && request.resource.data.conta <= 5000))
         && (!('origem' in request.resource.data)
-            || texto(request.resource.data.origem, 0, 300));
+            || texto(request.resource.data.origem, 0, 300))
+        // indicação: código do próprio lead e, se veio por link, o código de quem indicou
+        && (!('codigo' in request.resource.data)
+            || (request.resource.data.codigo is string
+                && request.resource.data.codigo.matches('^[a-f0-9]{10}$')))
+        && (!('indicadoPor' in request.resource.data)
+            || (request.resource.data.indicadoPor is string
+                && request.resource.data.indicadoPor.matches('^[a-f0-9]{10}$')
+                && request.resource.data.indicadoPor != request.resource.data.get('codigo', '')));
 
       allow update: if
         // o público grava UMA vez a escolha do final (agora ou aguardar)
@@ -85,11 +94,15 @@ service cloud.firestore {
       allow create: if ativo()
         && request.resource.data.keys().hasOnly(
           ['nome', 'telefone', 'faixa', 'conta', 'imovel', 'fase', 'origem', 'escolha',
+           'codigo', 'indicadoPor',
            'leadCriadoEm', 'vendedorId', 'etapa', 'criadoEm', 'atualizadoEm'])
         && get(caminho('leads', id)).data.get('distribuido', false) == false
         && getAfter(caminho('leads', id)).data.distribuido == true
         && request.resource.data.nome == get(caminho('leads', id)).data.nome
         && request.resource.data.telefone == get(caminho('leads', id)).data.telefone
+        // a indicação vem do lead como está: ninguém da equipe muda quem indicou
+        && request.resource.data.get('codigo', '') == get(caminho('leads', id)).data.get('codigo', '')
+        && request.resource.data.get('indicadoPor', '') == get(caminho('leads', id)).data.get('indicadoPor', '')
         && request.resource.data.etapa == 'Novo Lead'
         && request.resource.data.criadoEm == request.time
         && request.resource.data.atualizadoEm == request.time

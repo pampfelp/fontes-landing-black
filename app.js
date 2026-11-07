@@ -132,9 +132,33 @@ function codigoLead(telefone, nome) {
   return `${telefone}-${nomeLimpo}`;
 }
 
+// ---------------------------------------------------------------------------
+// Indicação: cada lead tem um código de 10 letras (SHA-256 do código do lead,
+// então é o mesmo se a pessoa se registrar de novo). O link de indicar leva
+// ?ind=código; quem chega por ele grava indicadoPor no próprio lead, e o painel
+// liga os dois para contar os prêmios.
+const CODIGO_VALIDO = /^[a-f0-9]{10}$/;
+const lerGuardado = (chave) => { try { return localStorage.getItem(chave) || ''; } catch { return ''; } };
+const guardar = (chave, v) => { try { localStorage.setItem(chave, v); } catch { /* aba anônima */ } };
+
+// Quem abriu um link de indicação fica marcado no aparelho, mesmo se voltar depois sem o link
+const indicadoNaUrl = (new URLSearchParams(location.search).get('ind') || '').toLowerCase();
+if (CODIGO_VALIDO.test(indicadoNaUrl)) guardar('fontes-indicado-por', indicadoNaUrl);
+let meuCodigo = CODIGO_VALIDO.test(lerGuardado('fontes-meu-codigo')) ? lerGuardado('fontes-meu-codigo') : '';
+
+async function codigoIndicacao(id) {
+  const resumo = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(id));
+  return [...new Uint8Array(resumo)].map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 10);
+}
+
 async function salvarLead(dados) {
   const { fs, db } = await carregarFirestore();
   const id = codigoLead(dados.telefone, dados.nome);
+  dados.codigo = await codigoIndicacao(id);
+  const indicadoPor = lerGuardado('fontes-indicado-por');
+  if (CODIGO_VALIDO.test(indicadoPor) && indicadoPor !== dados.codigo) dados.indicadoPor = indicadoPor;
+  meuCodigo = dados.codigo;
+  guardar('fontes-meu-codigo', meuCodigo);
   try {
     await fs.setDoc(fs.doc(db, 'leads', id), { ...dados, criadoEm: fs.serverTimestamp() });
   } catch (erro) {
@@ -188,7 +212,7 @@ function mensagemLead() {
 const textosWhatsApp = {
   agente: () => 'Olá! Vim pela Black de Outro Mundo e quero falar com um agente sobre energia solar.',
   lead: mensagemLead,
-  indicar: () => `Olhe isso: a Fontes Energia investiga sua conta de luz de graça e mostra quanto dá para economizar com energia solar. ${location.origin}${location.pathname}`
+  indicar: () => `Olhe isso: a Fontes Energia investiga sua conta de luz de graça e mostra quanto dá para economizar com energia solar. ${location.origin}${location.pathname}?ind=${meuCodigo}`
 };
 
 // Links de WhatsApp montados na hora do clique, com o texto do momento
@@ -197,6 +221,13 @@ document.addEventListener('click', (e) => {
   if (!link) return;
   e.preventDefault();
   const tipo = link.dataset.wa;
+  if (tipo === 'indicar' && !meuCodigo) {
+    // Sem investigação feita neste aparelho, a indicação não teria a quem contar
+    const aviso = document.querySelector('.indicacao-aviso');
+    aviso.hidden = false;
+    aviso.querySelector('a').focus();
+    return;
+  }
   const url = tipo === 'indicar' ? linkWhatsApp(textosWhatsApp.indicar(), '') : linkWhatsApp(textosWhatsApp[tipo]());
   window.open(url, '_blank', 'noopener');
 });

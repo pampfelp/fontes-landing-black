@@ -611,6 +611,8 @@ img { max-width: 100%; display: block; }
 
 .indicacao .botao-indicar { margin-top: 44px; }
 .indicacao-regras { margin: 20px 0 0; max-width: 46rem; color: var(--muted); font-size: .9rem; }
+.indicacao-aviso { margin: 16px 0 0; max-width: 46rem; color: var(--ink); font-size: .95rem; }
+.indicacao-aviso .link-verde { margin-left: 4px; }
 
 /* Perguntas */
 .perguntas-grade {
