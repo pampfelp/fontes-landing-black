@@ -173,12 +173,13 @@ new IntersectionObserver(([entrada]) => {
   flutuante.hidden = entrada.isIntersecting;
 }, { threshold: 0 }).observe(form);
 
-// Contagem: dias, horas e minutos até o lançamento (antes) ou o fim (durante)
+// Contagem: dias, horas, minutos e segundos até o lançamento (antes) ou o fim (durante)
 const contagem = document.querySelector('.contagem');
 const relogio = contagem.querySelector('.contagem-relogio');
 const numeros = Object.fromEntries([...relogio.querySelectorAll('[data-unidade]')].map((el) => [el.dataset.unidade, el]));
 let ultimaFase = null;
-let ultimoMinuto = null;
+let ultimoSegundo = null;
+let ultimoRotulo = null;
 
 function aplicarFase() {
   const textos = FASES[fase];
@@ -189,30 +190,37 @@ function aplicarFase() {
   });
 }
 
+const doisDigitos = (n) => String(n).padStart(2, '0');
+
 function atualizarContagem() {
   const agora = relogioAgora();
   fase = faseAgora(agora);
-  if (fase !== ultimaFase) { aplicarFase(); ultimaFase = fase; ultimoMinuto = null; }
+  if (fase !== ultimaFase) { aplicarFase(); ultimaFase = fase; ultimoSegundo = null; }
 
   const resta = fase === 'depois' ? 0 : (fase === 'antes' ? LANCAMENTO : ENCERRAMENTO) - agora;
 
-  const minutosTotais = Math.max(0, Math.ceil(resta / 60000));
-  if (minutosTotais === ultimoMinuto) return;
-  ultimoMinuto = minutosTotais;
+  const segundosTotais = Math.max(0, Math.ceil(resta / 1000));
+  if (segundosTotais === ultimoSegundo) return;
+  ultimoSegundo = segundosTotais;
 
-  const dias = Math.floor(minutosTotais / 1440);
-  const horas = Math.floor((minutosTotais % 1440) / 60);
-  const minutos = minutosTotais % 60;
-  numeros.dias.textContent = String(dias).padStart(2, '0');
-  numeros.horas.textContent = String(horas).padStart(2, '0');
-  numeros.minutos.textContent = String(minutos).padStart(2, '0');
-  relogio.setAttribute('aria-label', fase === 'depois'
+  const dias = Math.floor(segundosTotais / 86400);
+  const horas = Math.floor((segundosTotais % 86400) / 3600);
+  const minutos = Math.floor((segundosTotais % 3600) / 60);
+  const segundos = segundosTotais % 60;
+  numeros.dias.textContent = doisDigitos(dias);
+  numeros.horas.textContent = doisDigitos(horas);
+  numeros.minutos.textContent = doisDigitos(minutos);
+  numeros.segundos.textContent = doisDigitos(segundos);
+
+  // O rótulo para leitor de tela muda só a cada minuto, para não falar sem parar
+  const rotulo = fase === 'depois'
     ? 'Encerrada'
-    : `Faltam ${dias} dias, ${horas} horas e ${minutos} minutos`);
+    : `Faltam ${dias} dias, ${horas} horas e ${minutos} minutos`;
+  if (rotulo !== ultimoRotulo) { relogio.setAttribute('aria-label', rotulo); ultimoRotulo = rotulo; }
 }
 
 if (Number.isNaN(LANCAMENTO) || Number.isNaN(ENCERRAMENTO)) {
   console.warn('[landing] datas da campanha inválidas (data-lancamento e data-encerramento no <body>)');
 }
 atualizarContagem();
-setInterval(atualizarContagem, 1000);
+setInterval(atualizarContagem, 250);

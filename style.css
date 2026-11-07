@@ -566,8 +566,8 @@ img { max-width: 100%; display: block; }
 
 .contagem-relogio {
   display: inline-grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(20px, 5vw, 64px);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(16px, 4vw, 52px);
   padding: 26px clamp(28px, 5vw, 60px) 22px;
   border: 2px solid var(--accent);
   border-radius: 6px;
@@ -577,7 +577,7 @@ img { max-width: 100%; display: block; }
 .contagem-num {
   display: block;
   color: var(--accent);
-  font-size: clamp(3.2rem, 9vw, 5.6rem);
+  font-size: clamp(3rem, 8vw, 5.2rem);
   font-weight: 900;
   font-stretch: 112%;
   font-variant-numeric: tabular-nums;
@@ -695,7 +695,13 @@ img { max-width: 100%; display: block; }
 
   .flutuante { left: 16px; right: 16px; bottom: 16px; justify-content: center; }
 
-  .contagem-relogio { display: grid; width: 100%; gap: 8px; padding: 22px 12px 18px; }
-  .contagem-rotulo { font-size: .75rem; letter-spacing: .06em; }
+  .contagem-relogio { display: grid; width: 100%; gap: 4px; padding: 20px 8px 16px; }
+  .contagem-num { font-size: clamp(2.2rem, 11vw, 3rem); }
+  .contagem-rotulo { font-size: .7rem; letter-spacing: .04em; }
   .contagem .botao-largo { display: flex; width: 100%; }
+}
+
+/* Celular muito estreito: rótulos menores para "Segundos" caber na coluna */
+@media (max-width: 360px) {
+  .contagem-rotulo { font-size: .62rem; letter-spacing: 0; }
 }
