@@ -5,10 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Black de Outro Mundo | Fontes Energia</title>
   <meta name="description" content="Os agentes da Fontes Energia investigam sua conta de luz de graça e mostram quanto você economiza com energia solar.">
+  <!-- Prévia do link (WhatsApp, redes): logo da campanha -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pampfelp.github.io/fontes-landing-black/">
+  <meta property="og:title" content="Black de Outro Mundo | Fontes Energia">
+  <meta property="og:description" content="Os agentes da Fontes Energia investigam sua conta de luz de graça e mostram quanto você economiza com energia solar.">
+  <meta property="og:image" content="https://pampfelp.github.io/fontes-landing-black/assets/compartilhar.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Logo da campanha Black de Outro Mundo">
+  <meta property="og:locale" content="pt_BR">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=17">
+  <link rel="stylesheet" href="style.css?v=19">
 </head>
 <!-- WhatsApp dos agentes: quem manda é config/contato no Firestore (aba Equipe do painel).
      Este data-whatsapp só vale se o banco não responder. Só dígitos, com 55 e DDD.
@@ -212,6 +223,47 @@
           <div><dt>Monitoramento</dt><dd>A geração acompanhada pelo celular.</dd></div>
           <div class="maleta-black"><dt>Condição da Black</dt><dd data-texto-fase="maleta">As condições de novembro são passadas pelo agente no WhatsApp.</dd></div>
         </dl>
+      </div>
+    </section>
+
+    <!-- 4b. Indicação: prêmios no estilo encarte de atacado -->
+    <section class="indicacao" aria-labelledby="t-indicacao">
+      <div class="largura">
+        <p class="indicacao-selo">Missão extra</p>
+        <h2 id="t-indicacao" class="indicacao-titulo">Uma boa indicação pode levar você a outro mundo.</h2>
+        <p class="indicacao-sub">Indique quem também paga caro de luz. Cada contrato fechado entra na sua contagem.</p>
+
+        <div class="ofertas">
+          <article class="oferta">
+            <span class="oferta-estrela" aria-hidden="true">Prêmio</span>
+            <svg class="oferta-icone" viewBox="0 0 120 64" aria-hidden="true">
+              <rect x="4" y="6" width="112" height="40" rx="8" fill="#fff" stroke="#111" stroke-width="4"/>
+              <path d="M14 34h92" stroke="#111" stroke-width="3"/>
+              <path d="M14 40h92" stroke="#111" stroke-width="3"/>
+              <circle cx="102" cy="18" r="3" fill="#18a90f"/>
+              <path d="M30 52c0 4-4 4-4 8M50 52c0 4-4 4-4 8M70 52c0 4-4 4-4 8M90 52c0 4-4 4-4 8" fill="none" stroke="#2b8fd6" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <h3 class="oferta-nome">Ar-condicionado split</h3>
+            <p class="oferta-detalhe">Inverter 9.000 BTUs, com instalação</p>
+            <p class="oferta-etiqueta"><span class="etiqueta-num">2</span><span class="etiqueta-txt">indicados<br>com contrato fechado</span></p>
+          </article>
+
+          <article class="oferta oferta-maior">
+            <span class="oferta-estrela" aria-hidden="true">Prêmio</span>
+            <svg class="oferta-icone" viewBox="0 0 120 64" aria-hidden="true">
+              <path d="M8 40l40-8 22-26c4-4 10-4 10 2l-8 24 34-6c6-1 8 6 2 9L20 50c-5 1-9-1-12-4z" fill="#fff" stroke="#111" stroke-width="4" stroke-linejoin="round"/>
+              <path d="M44 33l-10-16h10l18 12" fill="#fff" stroke="#111" stroke-width="4" stroke-linejoin="round"/>
+              <path d="M10 60h100" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <h3 class="oferta-nome">Viagem para dois</h3>
+            <p class="oferta-detalhe">Rio de Janeiro ou Campos do Jordão, com passagem aérea e 3 noites de hospedagem</p>
+            <p class="oferta-etiqueta"><span class="etiqueta-num">3</span><span class="etiqueta-txt">indicados<br>com contrato fechado</span></p>
+          </article>
+        </div>
+
+        <a class="botao botao-link botao-largo botao-indicar" href="#" data-wa="indicar">Indicar pelo WhatsApp</a>
+
+        <p class="indicacao-regras">A indicação precisa ser nova e registrada no primeiro contato. O contrato vale com entrada paga ou financiamento aprovado; se cancelar, deixa de contar. Os prêmios não se somam: vale o maior nível alcançado.</p>
       </div>
     </section>
 
