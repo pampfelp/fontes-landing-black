@@ -124,7 +124,10 @@ service cloud.firestore {
 
     // ------------------------------------------------------------------
     match /usuarios/{uid} {
-      allow read: if ativo() && (request.auth.uid == uid || admin());
+      // cada login lê o próprio vínculo mesmo sem ele existir ainda: é assim que
+      // o painel sabe se mostra "criar acesso de admin" ou "acesso não liberado"
+      // (antecipação A8, caso 3: a primeira conta não conseguia nem se ver)
+      allow read: if logado() && (request.auth.uid == uid || admin());
 
       // janela do primeiro admin, amarrada ao e-mail do dono (antecipação A8)
       allow create: if logado()
