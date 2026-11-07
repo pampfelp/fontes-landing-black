@@ -7,6 +7,7 @@ rules_version = '2';
 // negocios   base do funil: um por lead, com vendedor e etapa do kanban.
 // usuarios   vínculo de cada login: papel (admin ou vendedor) e ativo.
 // config/rodizio  fila de vendedores ativos e a vez de quem.
+// config/contato  WhatsApp que a landing abre (o admin troca no painel).
 //
 // Cada documento casa com UM match só (antecipação A7: matches se somam).
 service cloud.firestore {
@@ -34,7 +35,11 @@ service cloud.firestore {
 
     // ------------------------------------------------------------------
     match /leads/{id} {
+      // O código é telefone-nome: o mesmo telefone com o mesmo nome cai no
+      // mesmo documento e a segunda criação vira update (negado) = sem repetido.
       allow create: if
+        id.matches('^' + request.resource.data.telefone + '-[a-z0-9-]{1,60}$')
+        &&
         request.resource.data.keys().hasOnly(
           ['nome', 'telefone', 'faixa', 'conta', 'imovel', 'fase', 'origem', 'criadoEm', 'distribuido'])
         && request.resource.data.keys().hasAll(
@@ -170,6 +175,16 @@ service cloud.firestore {
       allow update: if ativo()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['proximo'])
         && request.resource.data.proximo == (resource.data.proximo + 1) % resource.data.fila.size();
+    }
+
+    // ------------------------------------------------------------------
+    match /config/contato {
+      allow read: if true;
+      allow create, update: if admin()
+        && request.resource.data.keys().hasOnly(['whatsapp', 'atualizadoEm'])
+        && request.resource.data.whatsapp is string
+        && request.resource.data.whatsapp.matches('^55[0-9]{10,11}$')
+        && request.resource.data.atualizadoEm == request.time;
     }
   }
 }

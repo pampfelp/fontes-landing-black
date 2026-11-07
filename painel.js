@@ -45,6 +45,7 @@ const estado = {
   negocios: new Map(),   // id -> negócio
   pendentes: new Map(),  // id -> lead esperando distribuição
   rodizio: null,
+  contato: null,
   escutas: [],
   aba: 'funil',
   aberto: null
@@ -275,6 +276,10 @@ function iniciarApp() {
   });
 
   if (ehAdmin()) {
+    escutar(doc(db, 'config', 'contato'), (snap) => {
+      estado.contato = snap.exists() ? snap.data().whatsapp : null;
+      if (formContato.whatsapp.disabled) mostrarContato();
+    });
     escutar(collection(db, 'usuarios'), (snap) => {
       estado.equipe = new Map(snap.docs.map((d) => [d.id, { uid: d.id, ...d.data() }]));
       preencherVendedores();
@@ -766,3 +771,54 @@ formPessoa.addEventListener('submit', async (e) => {
 
 // Atualiza os "há X min" dos cartões
 setInterval(() => { if (estado.vinculo && !$('#tela-app').hidden) desenharFunil(); }, 60000);
+
+// ---------------------------------------------------------------------------
+// WhatsApp dos agentes (config/contato), lido pela landing
+const formContato = $('#form-contato');
+
+function mostrarContato() {
+  const n = estado.contato ? estado.contato.slice(2) : '';
+  formContato.whatsapp.value = n ? telefoneBonito(n) : '';
+  formContato.whatsapp.placeholder = n ? '' : 'Nenhum número salvo';
+}
+
+function edicaoContato(ligado) {
+  formContato.whatsapp.disabled = !ligado;
+  $('[data-acao="editar-contato"]', formContato).hidden = ligado;
+  $('[data-acao="cancelar-contato"]', formContato).hidden = !ligado;
+  $('[type="submit"]', formContato).hidden = !ligado;
+  mostrarAviso(formContato, '');
+  if (ligado) formContato.whatsapp.focus(); else mostrarContato();
+}
+
+formContato.addEventListener('click', (e) => {
+  const acao = e.target.closest('[data-acao]')?.dataset.acao;
+  if (acao === 'editar-contato') edicaoContato(true);
+  if (acao === 'cancelar-contato') edicaoContato(false);
+});
+
+formContato.whatsapp.addEventListener('input', () => {
+  const d = formContato.whatsapp.value.replace(/\D/g, '').slice(0, 11);
+  let v = d;
+  if (d.length > 2) v = `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length > 6) v = `(${d.slice(0, 2)}) ${d.slice(2, d.length - 4)}-${d.slice(-4)}`;
+  formContato.whatsapp.value = v;
+});
+
+formContato.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const d = formContato.whatsapp.value.replace(/\D/g, '');
+  if (d.length < 10 || d.length > 11) { mostrarAviso(formContato, 'Confira o número: DDD e 8 ou 9 dígitos.'); return; }
+  const botao = $('[type="submit"]', formContato);
+  botao.disabled = true;
+  try {
+    await setDoc(doc(db, 'config', 'contato'), { whatsapp: `55${d}`, atualizadoEm: serverTimestamp() });
+    estado.contato = `55${d}`;
+    edicaoContato(false);
+    avisarToast('Número dos agentes atualizado. A landing já usa o novo.');
+  } catch (erro) {
+    mostrarAviso(formContato, erroLegivel(erro));
+  } finally {
+    botao.disabled = false;
+  }
+});

@@ -230,6 +230,24 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .card .card-vendedor { color: var(--accent); font-weight: 600; }
 .card .card-valor { color: var(--ink); font-weight: 700; }
 
+/* WhatsApp dos agentes */
+.contato {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 12px 20px;
+  margin-top: 18px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+}
+.contato h2 { margin: 0; font-size: 1.1rem; font-weight: 800; }
+.contato .explica { margin-top: 4px; }
+.contato .campo { margin-top: 0; }
+.contato-acoes { display: flex; gap: 10px; }
+.contato .aviso { grid-column: 1 / -1; margin: 0; }
+
 /* Tabela da equipe */
 .tabela-rolagem { margin-top: 18px; overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; }
 .tabela { width: 100%; min-width: 720px; border-collapse: collapse; }
@@ -307,4 +325,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .dados { grid-template-columns: 1fr; }
   .secao-topo .botao-auto { width: 100%; }
   .filtros, .filtro, .filtro select, .filtro input { width: 100%; }
+  .contato { grid-template-columns: 1fr; }
+  .contato-acoes .botao { flex: 1; }
 }

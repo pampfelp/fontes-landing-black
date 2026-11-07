@@ -10,11 +10,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=17">
 </head>
-<!-- Número de WhatsApp da Fontes: só dígitos, com 55 e DDD (ex.: 5591999999999).
+<!-- WhatsApp dos agentes: quem manda é config/contato no Firestore (aba Equipe do painel).
+     Este data-whatsapp só vale se o banco não responder. Só dígitos, com 55 e DDD.
      Datas da campanha no horário de Brasília (-03:00): a página entra no ar dia 10/11 em
      expectativa, a Black vai de 27/11 a 29/11 e depois fica encerrada, com cadastro aberto.
      Para ver outro momento: index.html?agora=2026-11-27T09:00 -->
-<body data-whatsapp=""
+<body data-whatsapp="5591985864867"
       data-lancamento="2026-11-27T00:00:00-03:00"
       data-encerramento="2026-11-29T23:59:59-03:00">
   <header class="topo">
@@ -262,6 +263,6 @@
     <span>Falar com um agente</span>
   </a>
 
-  <script src="app.js?v=11"></script>
+  <script src="app.js?v=12"></script>
 </body>
 </html>

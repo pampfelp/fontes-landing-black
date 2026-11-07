@@ -4,8 +4,9 @@
 // resolver agora (WhatsApp) e aguardar o agente. O contato vai para o
 // Firestore (coleção leads, só criação; ver firestore.rules).
 
-const NUMERO = (document.body.dataset.whatsapp || '').replace(/\D/g, '');
-if (!NUMERO) console.warn('[landing] número de WhatsApp da Fontes não configurado (data-whatsapp no <body>)');
+// WhatsApp dos agentes: vem de config/contato no Firestore (o admin troca no
+// painel). O data-whatsapp do <body> só vale se o banco não responder.
+let numeroWhatsApp = (document.body.dataset.whatsapp || '').replace(/\D/g, '');
 
 // ---------------------------------------------------------------------------
 // Cálculo da conta (regra do Felipe, 07/11)
@@ -123,12 +124,33 @@ function carregarFirestore() {
 
 let leadId = null;
 
+// Código do lead = telefone-nome. Mesmo telefone com o mesmo nome cai no mesmo
+// documento; as regras negam a segunda criação, e isso conta como "já registrado".
+function codigoLead(telefone, nome) {
+  const nomeLimpo = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'sem-nome';
+  return `${telefone}-${nomeLimpo}`;
+}
+
 async function salvarLead(dados) {
   const { fs, db } = await carregarFirestore();
-  const ref = fs.doc(fs.collection(db, 'leads'));
-  await fs.setDoc(ref, { ...dados, criadoEm: fs.serverTimestamp() });
-  return ref.id;
+  const id = codigoLead(dados.telefone, dados.nome);
+  try {
+    await fs.setDoc(fs.doc(db, 'leads', id), { ...dados, criadoEm: fs.serverTimestamp() });
+  } catch (erro) {
+    if (erro?.code !== 'permission-denied') throw erro;
+    console.info('[landing] contato já registrado com este telefone e nome');
+  }
+  return id;
 }
+
+// Busca o número dos agentes logo que a página abre, para o clique abrir na hora
+setTimeout(() => {
+  carregarFirestore()
+    .then(({ fs, db }) => fs.getDoc(fs.doc(db, 'config', 'contato')))
+    .then((snap) => { if (snap.exists() && snap.data().whatsapp) numeroWhatsApp = snap.data().whatsapp; })
+    .catch((erro) => console.warn('[landing] número dos agentes não carregou; usando o da página', erro?.code));
+}, 0);
 
 async function salvarEscolha(escolha) {
   if (!leadId) return;
@@ -147,7 +169,7 @@ const valor = (nome) => form.querySelector(`input[name="${nome}"]:checked`)?.val
 const contaRegua = () => Number(form.conta.value);
 const digitos = (v) => v.replace(/\D/g, '');
 
-function linkWhatsApp(texto, numero = NUMERO) {
+function linkWhatsApp(texto, numero = numeroWhatsApp) {
   return `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
 }
 

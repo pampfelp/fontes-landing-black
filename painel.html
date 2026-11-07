@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="painel.css?v=1">
+  <link rel="stylesheet" href="painel.css?v=2">
 </head>
 <body>
   <!-- Carregando -->
@@ -90,6 +90,22 @@
         <button type="button" class="botao botao-auto" data-acao="cadastrar">Cadastrar pessoa</button>
       </div>
       <dl class="kpis" id="kpis-equipe"></dl>
+
+      <form class="contato" id="form-contato" novalidate aria-labelledby="t-contato">
+        <div>
+          <h2 id="t-contato">WhatsApp dos agentes</h2>
+          <p class="explica">Número que a landing abre quando o cliente escolhe falar com um agente agora.</p>
+        </div>
+        <label class="campo"><span>WhatsApp com DDD</span>
+          <input type="tel" name="whatsapp" inputmode="numeric" maxlength="16" placeholder="(91) 99999-9999" disabled>
+        </label>
+        <div class="contato-acoes">
+          <button type="button" class="botao botao-contorno botao-auto" data-acao="editar-contato">Alterar</button>
+          <button type="button" class="botao botao-contorno botao-auto" data-acao="cancelar-contato" hidden>Cancelar</button>
+          <button type="submit" class="botao botao-auto" hidden>Salvar número</button>
+        </div>
+        <p class="aviso" role="alert" hidden></p>
+      </form>
       <p class="explica">Cada lead novo vai para o próximo vendedor ativo da fila, na ordem abaixo, e a fila volta ao começo depois do último. Vendedor pausado sai da fila e não recebe leads.</p>
       <div class="tabela-rolagem">
         <table class="tabela">
@@ -179,6 +195,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-  <script type="module" src="painel.js?v=1"></script>
+  <script type="module" src="painel.js?v=2"></script>
 </body>
 </html>
